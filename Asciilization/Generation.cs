@@ -111,51 +111,51 @@ public class Generation
         }
     }
 
-    public static void Rivers(Map map)
-    {
-        int count = random.Next(6, 11);
-        int k = 0;
-        while (k < count)
-        {
-            int i = random.Next(map.hexes.GetLength(0));
-            int j = random.Next(map.hexes.GetLength(1));
-            if (map.hexes[i, j].terrain == Terrain.Mountains || map.hexes[i, j].terrain == Terrain.PlainHills || map.hexes[i, j].terrain == Terrain.DesertHills)
-            {
-                map.hexes[i, j].withRiver = true;
-            }
-        }
-    }
-
-    public static void SetRiverDirection(Hex hex, Map map)
-    {
-        Dictionary<Hex, float> values;
-        int maxValue = 0;
-        int maxHexIndex;
-        if (hex.x % 2 == 0)
-        {
-            values = new Dictionary<Hex, float>()
-            {
-                { map.hexes[hex.y - 1, hex.x], valueAlitude[hex.y - 1, hex.x] },
-                { map.hexes[hex.y - 1, hex.x - 1], valueAlitude[hex.y - 1, hex.x - 1] },
-                { map.hexes[hex.y, hex.x - 1], valueAlitude[hex.y, hex.x - 1] },
-                { map.hexes[hex.y + 1, hex.x], valueAlitude[hex.y + 1, hex.x] },
-                { map.hexes[hex.y, hex.x + 1], valueAlitude[hex.y, hex.x + 1] },
-                { map.hexes[hex.y - 1, hex.x + 1], valueAlitude[hex.y - 1, hex.x + 1] }
-            };
-        }
-        else
-        {
-            values = new Dictionary<Hex, float>()
-            {
-                { map.hexes[hex.y - 1, hex.x], valueAlitude[hex.y - 1, hex.x] },
-                { map.hexes[hex.y, hex.x - 1], valueAlitude[hex.y, hex.x - 1] },
-                { map.hexes[hex.y + 1, hex.x - 1], valueAlitude[hex.y + 1, hex.x - 1] },
-                { map.hexes[hex.y + 1, hex.x], valueAlitude[hex.y + 1, hex.x] },
-                { map.hexes[hex.y + 1, hex.x + 1], valueAlitude[hex.y + 1, hex.x + 1] },
-                { map.hexes[hex.y, hex.x + 1], valueAlitude[hex.y, hex.x + 1] }
-            };
-        }
-    }
+    // public static void Rivers(Map map)
+    // {
+    //     int count = random.Next(6, 11);
+    //     int k = 0;
+    //     while (k < count)
+    //     {
+    //         int i = random.Next(map.hexes.GetLength(0));
+    //         int j = random.Next(map.hexes.GetLength(1));
+    //         if (map.hexes[i, j].terrain == Terrain.Mountains || map.hexes[i, j].terrain == Terrain.PlainHills || map.hexes[i, j].terrain == Terrain.DesertHills)
+    //         {
+    //             map.hexes[i, j].withRiver = true;
+    //         }
+    //     }
+    // }
+    //
+    // public static void SetRiverDirection(Hex hex, Map map)
+    // {
+    //     Dictionary<Hex, float> values;
+    //     int maxValue = 0;
+    //     int maxHexIndex;
+    //     if (hex.x % 2 == 0)
+    //     {
+    //         values = new Dictionary<Hex, float>()
+    //         {
+    //             { map.hexes[hex.y - 1, hex.x], valueAlitude[hex.y - 1, hex.x] },
+    //             { map.hexes[hex.y - 1, hex.x - 1], valueAlitude[hex.y - 1, hex.x - 1] },
+    //             { map.hexes[hex.y, hex.x - 1], valueAlitude[hex.y, hex.x - 1] },
+    //             { map.hexes[hex.y + 1, hex.x], valueAlitude[hex.y + 1, hex.x] },
+    //             { map.hexes[hex.y, hex.x + 1], valueAlitude[hex.y, hex.x + 1] },
+    //             { map.hexes[hex.y - 1, hex.x + 1], valueAlitude[hex.y - 1, hex.x + 1] }
+    //         };
+    //     }
+    //     else
+    //     {
+    //         values = new Dictionary<Hex, float>()
+    //         {
+    //             { map.hexes[hex.y - 1, hex.x], valueAlitude[hex.y - 1, hex.x] },
+    //             { map.hexes[hex.y, hex.x - 1], valueAlitude[hex.y, hex.x - 1] },
+    //             { map.hexes[hex.y + 1, hex.x - 1], valueAlitude[hex.y + 1, hex.x - 1] },
+    //             { map.hexes[hex.y + 1, hex.x], valueAlitude[hex.y + 1, hex.x] },
+    //             { map.hexes[hex.y + 1, hex.x + 1], valueAlitude[hex.y + 1, hex.x + 1] },
+    //             { map.hexes[hex.y, hex.x + 1], valueAlitude[hex.y, hex.x + 1] }
+    //         };
+    //     }
+    // }
 
     public static void Civs(Map map, int count)
     {
@@ -166,7 +166,7 @@ public class Generation
         {
             randX = random.Next(map.hexes.GetLength(1));
             randY = random.Next(map.hexes.GetLength(0));
-            if ((map.hexes[randY, randX].terrain != Terrain.Water) && (map.hexes[randY, randX].terrain != Terrain.Mountains) && (map.hexes[randY, randX].civ == Civ.Without))
+            if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
             {
                 map.hexes[randY, randX].civ = (Civ)i + 1;
                 i++;

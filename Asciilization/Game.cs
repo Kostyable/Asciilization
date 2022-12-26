@@ -20,17 +20,17 @@ public class Game
     static void Main(string[] args)
     {
         Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
-        Console.SetBufferSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
+        Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
         InputSimulator inputSimulator = new InputSimulator();
         inputSimulator.Keyboard.KeyDown(VirtualKeyCode.MENU);
-        inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+        inputSimulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
+        inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
         var handle = GetStdHandle(-11);
         int mode;
         GetConsoleMode(handle, out mode);
         SetConsoleMode(handle, mode | 0x4);
         Console.Title = "ASCIILIZATION";
-        Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
         IntPtr consoleWindow = User32.GetForegroundWindow();
         User32.SetWindowLong(consoleWindow, GWL_EXSTYLE, (int)User32.GetWindowLong(consoleWindow, GWL_EXSTYLE) ^ WS_EX_LAYERED);
         User32.SetLayeredWindowAttributes(consoleWindow, 0, 255, LWA_ALPHA);
@@ -43,33 +43,5 @@ public class Game
         Printing.Init(16, 8, 0, 0, 3);
         Printing.Map(map);
         Control.Map(map);
-        //AdvancedPrinting.Map(map);
-        //AdvancedPrinting.Print();
-        //Console.ReadKey();
-        //for (int i = 0; i < map.hexes.GetLength(0); i++)
-        //{
-        //    for (int j = 0; j < map.hexes.GetLength(1); j++)
-        //    {
-        //        if (map.hexes[i, j].terrain == Terrain.Water)
-        //        {
-        //            Console.ForegroundColor = ConsoleColor.DarkBlue;
-        //        }
-        //        else
-        //        {
-        //            Console.ForegroundColor = ConsoleColor.Green;
-        //        }
-        //        Console.Write("{0: 0.00}", Generation.Distance(map, j, i));
-        //        if ((i == 11) && (j == 5))
-        //        {
-        //            Console.Write("y");
-        //        }
-        //        else
-        //        {
-        //            Console.Write(" ");
-        //        }
-        //    }
-        //    Console.WriteLine();
-        //}
-        //Console.ReadKey();
     }
 }

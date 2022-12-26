@@ -6,8 +6,8 @@ public class Hex
     public int y;
     public Terrain terrain;
     public Civ civ;
-    public bool withRiver;
-    public int riverDir;
+    //public bool withRiver;
+    //public int riverDir;
 
     public Hex(int x, int y)
     {

@@ -3,6 +3,7 @@
 public class Control
 {
     public static ConsoleKeyInfo input;
+    public static bool isGrid;
     public static void Map(Map map)
     {
         while (true)
@@ -54,14 +55,12 @@ public class Control
             }
             else if (input.Key == ConsoleKey.G)
             {
-                if (map.isSelected.terrain != Terrain.Water && map.isSelected.terrain != Terrain.Mountains)
-                {
-                    map.isSelected.civ = Civ.Blue;
-                    Printing.Hex(map.isSelected);
-                }
+                isGrid = !isGrid;
+                Grid(map);
             }
             else if (input.Key == ConsoleKey.Escape)
             {
+                Console.SetCursorPosition(Console.WindowWidth - 1, Console.WindowHeight - 1);
                 break;
             }
         }
@@ -71,6 +70,10 @@ public class Control
         Printing.Cursor(map.isSelected);
         input = Console.ReadKey();
         Printing.NotCursor(map.isSelected);
+        if (isGrid)
+        {
+            Printing.Grid(map.isSelected);
+        }
     }
     public static void OffsetLeft(Map map)
     {
@@ -79,6 +82,10 @@ public class Control
             Printing.offset.x--;
             Console.Clear();
             Printing.Map(map);
+            if (isGrid)
+            {
+                Grid(map);
+            }
         }
         if (map.isSelected.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.x % 2 == 0)
         {
@@ -98,6 +105,10 @@ public class Control
                 Printing.offset.x++;
                 Console.Clear();
                 Printing.Map(map);
+                if (isGrid)
+                {
+                    Grid(map);
+                }
             }
         }
         else
@@ -107,6 +118,10 @@ public class Control
                 Printing.offset.x++;
                 Console.Clear();
                 Printing.Map(map);
+                if (isGrid)
+                {
+                    Grid(map);
+                }
             }
         }
         if (map.isSelected.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.x % 2 == 0)
@@ -125,6 +140,10 @@ public class Control
             Printing.offset.y--;
             Console.Clear();
             Printing.Map(map);
+            if (isGrid)
+            {
+                Grid(map);
+            }
         }
         map.isSelected = map.hexes[map.isSelected.y - 1, map.isSelected.x];
     }
@@ -137,6 +156,10 @@ public class Control
                 Printing.offset.y++;
                 Console.Clear();
                 Printing.Map(map);
+                if (isGrid)
+                {
+                    Grid(map);
+                }
             }
         }
         else
@@ -146,6 +169,10 @@ public class Control
                 Printing.offset.y++;
                 Console.Clear();
                 Printing.Map(map);
+                if (isGrid)
+                {
+                    Grid(map);
+                }
             }
         }
         map.isSelected = map.hexes[map.isSelected.y + 1, map.isSelected.x];
@@ -156,28 +183,41 @@ public class Control
         CursorInCenter(map);
         Console.Clear();
         Printing.Map(map);
+        if (isGrid)
+        {
+            Grid(map);
+        }
     }
     public static void ZoomOut(Map map)
     {
         Printing.Init(Printing.hexSize.x - 4, Printing.hexSize.y - 2, Printing.scale - 1);
         CursorInCenter(map);
+        if (Printing.scale == 0 && Printing.offset.x == map.hexes.GetLength(1) - Printing.screenSize.x)
+        {
+            Printing.offset.x--;
+        }
         Console.Clear();
         Printing.Map(map);
+        if (isGrid)
+        {
+            Grid(map);
+        }
     }
     public static void Regenerate(Map map)
     {
         Console.Clear();
         foreach (Hex hex in map.hexes)
         {
-            if (hex.civ != Civ.Without)
-            {
-                hex.civ = Civ.Without;
-            }
+            hex.civ = Civ.Without;
         }
         Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
         Generation.Map(map);
         Generation.Civs(map, 2);
         Printing.Map(map);
+        if (isGrid)
+        {
+            Grid(map);
+        }
     }
 
     public static void CursorInCenter(Map map)
@@ -228,11 +268,38 @@ public class Control
 
     public static void Grid(Map map)
     {
-        for (int i = 0; i < Printing.screenSize.y; i++)
+        if (isGrid)
         {
-            for (int j = 0; j < Printing.screenSize.x; j++)
+            for (int i = Printing.offset.y; i <= Printing.screenSize.y + Printing.offset.y; i++)
             {
-                Printing.Cursor(map.hexes[i, j]);
+                for (int j = Printing.offset.x; j < Printing.screenSize.x + Printing.offset.x; j++)
+                {
+                    if (i < Printing.screenSize.y + Printing.offset.y || (i == Printing.screenSize.y + Printing.offset.y && j % 2 == 0 && Console.WindowHeight - Printing.hexSize.y * Printing.screenSize.y >= Printing.hexSize.y && i != map.hexes.GetLength(0)))
+                    {
+                        Printing.Grid(map.hexes[i, j]);
+                    }
+                }
+                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.screenSize.x + Printing.offset.x != map.hexes.GetLength(1))
+                {
+                    Printing.Grid(map.hexes[i, Printing.screenSize.x + Printing.offset.x]);
+                }
+            }
+        }
+        else
+        {
+            for (int i = Printing.offset.y; i <= Printing.screenSize.y + Printing.offset.y; i++)
+            {
+                for (int j = Printing.offset.x; j < Printing.screenSize.x + Printing.offset.x; j++)
+                {
+                    if (i < Printing.screenSize.y + Printing.offset.y || (i == Printing.screenSize.y + Printing.offset.y && j % 2 == 0 && Console.WindowHeight - Printing.hexSize.y * Printing.screenSize.y >= Printing.hexSize.y && i != map.hexes.GetLength(0)))
+                    {
+                        Printing.NotGrid(map.hexes[i, j]);
+                    }
+                }
+                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.screenSize.x + Printing.offset.x != map.hexes.GetLength(1))
+                {
+                    Printing.NotGrid(map.hexes[i, Printing.screenSize.x + Printing.offset.x]);
+                }
             }
         }
     }
