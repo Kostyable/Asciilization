@@ -11,15 +11,15 @@ public class Printing
 
     public static void Init(int hexSizeX, int hexSizeY, int offsetX, int offsetY, int sc)
     {
-        hexSize.Init(hexSizeX, hexSizeY);
-        offset.Init(offsetX, offsetY);
+        hexSize = new Coordinates(hexSizeX, hexSizeY);
+        offset = new Coordinates(offsetX, offsetY);
         scale = sc;
         SetScreenSize();
     }
     
     public static void Init(int hexSizeX, int hexSizeY, int sc)
     {
-        hexSize.Init(hexSizeX, hexSizeY);
+        hexSize = new Coordinates(hexSizeX, hexSizeY);
         scale = sc;
         SetScreenSize();
     } 
@@ -124,11 +124,12 @@ public class Printing
             HalfHex(map.hexes[screenSize.y + offset.y, screenSize.x + offset.x]);
             HalfHex(map.hexes[screenSize.y + offset.y + 1, screenSize.x + offset.x]);
         }
+        Rivers(map);
     }
 
     public static void Hex(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         SetBackgroundColor(hex);
         for (int i = 0; i < hexSize.y / 2; i++)
         {
@@ -148,7 +149,7 @@ public class Printing
 
     public static void HalfHex(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         SetBackgroundColor(hex);
         int bU = 0;
         int bD = 0;
@@ -233,9 +234,169 @@ public class Printing
         }
     }
 
+    public static void Rivers(Map map)
+    {
+        Console.Write("\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m");
+        for (int i = offset.y - 1; i < screenSize.y + offset.y + 2; i++)
+        {
+            for (int j = offset.x - 1; j < screenSize.x + offset.x + 1; j++)
+            {
+                if (i != -1 && i < map.hexes.GetLength(0) && j != -1 && j != map.hexes.GetLength(1))
+                {
+                    if (map.hexes[i, j].riverDir != 6 && scale != 0)
+                    {
+                        River(map.hexes[i, j], map);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void River(Hex hex, Map map)
+    {
+        int delta;
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        if (hex.coordinates.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        if (hex.riverDir == 0)
+        {
+            for (int i = 0; i < scale + 2; i++)
+            {
+                if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
+                {
+                    if (cursor.y >= 0 && cursor.y < Console.WindowHeight)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y);
+                        Console.Write("~ ");
+                    }
+                    if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y - 1, hex.coordinates.x]);
+                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y - 1);
+                        Console.Write("~ ");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 1)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + i >= 0 && cursor.y + i < Console.WindowHeight)
+                {
+                    if (cursor.x + scale - i >= 0 && cursor.x + scale - i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + scale - i, cursor.y + i);
+                        Console.Write("~");
+                    }
+                    if (cursor.x + scale - i - 2 >= 0 && cursor.x + scale - i - 2 < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y - 1 + delta, hex.coordinates.x - 1]);
+                        Console.SetCursorPosition(cursor.x + scale - i - 2, cursor.y + i);
+                        Console.Write("~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 2)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y / 2 + i >= 0 && cursor.y + hexSize.y / 2 + i < Console.WindowHeight)
+                {
+                    if (cursor.x + i >= 0 && cursor.x + i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y / 2 + i);
+                        Console.Write("~");
+                    }
+
+                    if (cursor.x + i - 2 >= 0 && cursor.x + i - 2 < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y + delta, hex.coordinates.x - 1]);
+                        Console.SetCursorPosition(cursor.x + i - 2, cursor.y + hexSize.y / 2 + i);
+                        Console.Write("~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 3)
+        {
+            for (int i = 0; i < scale + 2; i++)
+            {
+                if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
+                {
+                    if (cursor.y + hexSize.y - 1 >= 0 && cursor.y + hexSize.y - 1 < Console.WindowHeight)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y - 1);
+                        Console.Write("~ ");
+                    }
+                    if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y + 1, hex.coordinates.x]);
+                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y);
+                        Console.Write("~ ");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 4)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y - 1 - i >= 0 && cursor.y + hexSize.y - 1 - i < Console.WindowHeight)
+                {
+                    if (cursor.x + hexSize.x - scale - 2 + i >= 0 && cursor.x + hexSize.x - scale - 2 + i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + hexSize.x - scale - 2 + i, cursor.y + hexSize.y - 1 - i);
+                        Console.Write("~");
+                    }
+                    if (cursor.x + hexSize.x - scale + i >= 0 && cursor.x + hexSize.x - scale + i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y + delta, hex.coordinates.x + 1]);
+                        Console.SetCursorPosition(cursor.x + hexSize.x - scale + i, cursor.y + hexSize.y - 1 - i);
+                        Console.Write("~");
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y / 2 - 1 - i >= 0 && cursor.y + hexSize.y / 2 - 1 - i < Console.WindowHeight)
+                {
+                    if (cursor.x + hexSize.x - 2 - i >= 0 && cursor.x + hexSize.x - 2 - i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(hex);
+                        Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y / 2 - 1 - i);
+                        Console.Write("~");
+                    }
+
+                    if (cursor.x + hexSize.x - i >= 0 && cursor.x + hexSize.x - i < Console.WindowWidth)
+                    {
+                        SetBackgroundColor(map.hexes[hex.coordinates.y - 1 + delta, hex.coordinates.x + 1]);
+                        Console.SetCursorPosition(cursor.x + hexSize.x - i, cursor.y + hexSize.y / 2 - 1 - i);
+                        Console.Write("~");
+                    }
+                }
+            }
+        }
+    }
+
     public static void Cursor(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         Console.Write("\x1b[38;2;" + 255 + ";" + 255 + ";" + 255 + "m");
         if (cursor.y > 0)
         {
@@ -260,7 +421,7 @@ public class Printing
             Console.Write("\\");
         }
 
-        if (scale > 0 || hex.x - offset.x != screenSize.x)
+        if (scale > 0 || hex.coordinates.x - offset.x != screenSize.x)
         {
             Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
             Console.Write("\\");
@@ -284,7 +445,7 @@ public class Printing
 
     public static void NotCursor(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         if (cursor.y > 0)
         {
             for (int i = 0; i < scale + 1; i++)
@@ -327,7 +488,7 @@ public class Printing
     
     public static void Grid(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         Console.Write("\x1b[38;2;" + 135 + ";" + 135 + ";" + 135 + "m");
         if (cursor.y > 0)
         {
@@ -352,7 +513,7 @@ public class Printing
             Console.Write("\\");
         }
 
-        if (scale > 0 || hex.x - offset.x != screenSize.x)
+        if (scale > 0 || hex.coordinates.x - offset.x != screenSize.x)
         {
             Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
             Console.Write("\\");
@@ -376,7 +537,7 @@ public class Printing
 
     public static void NotGrid(Hex hex)
     {
-        cursor = CountCursorPosition(hex.x, hex.y);
+        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         if (cursor.y > 0)
         {
             for (int i = 0; i < scale + 1; i++)

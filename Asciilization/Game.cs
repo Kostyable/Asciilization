@@ -17,15 +17,13 @@ public class Game
     const int LWA_ALPHA = 0x2;
     const int LWA_COLORKEY = 0x1;
 
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
         Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
         InputSimulator inputSimulator = new InputSimulator();
         inputSimulator.Keyboard.KeyDown(VirtualKeyCode.MENU);
         inputSimulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
-        inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
-        inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
         var handle = GetStdHandle(-11);
         int mode;
         GetConsoleMode(handle, out mode);
@@ -38,10 +36,18 @@ public class Game
         Console.Clear();
         Map map = new Map(100, 50);
         map.Fill();
-        Generation.Map(map);
-        Generation.Civs(map, 2);
         Printing.Init(16, 8, 0, 0, 3);
-        Printing.Map(map);
+        Launch(map);
+        inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
+        inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
         Control.Map(map);
+    }
+
+    public static void Launch(Map map)
+    {
+        Generation.Map(map);
+        Generation.Rivers(map, 5, 10);
+        Generation.Civs(map, 2);
+        Printing.Map(map);
     }
 }
