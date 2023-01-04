@@ -274,13 +274,13 @@ public class Printing
                     {
                         SetBackgroundColor(hex);
                         Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y);
-                        Console.Write("~ ");
+                        Console.Write("~");
                     }
                     if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
                     {
                         SetBackgroundColor(map.hexes[hex.coordinates.y - 1, hex.coordinates.x]);
                         Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y - 1);
-                        Console.Write("~ ");
+                        Console.Write("~");
                     }
                 }
             }
@@ -338,13 +338,13 @@ public class Printing
                     {
                         SetBackgroundColor(hex);
                         Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y - 1);
-                        Console.Write("~ ");
+                        Console.Write("~");
                     }
                     if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
                     {
                         SetBackgroundColor(map.hexes[hex.coordinates.y + 1, hex.coordinates.x]);
                         Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y);
-                        Console.Write("~ ");
+                        Console.Write("~");
                     }
                 }
             }
