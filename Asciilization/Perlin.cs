@@ -6,7 +6,7 @@ public class Perlin
 
     public Perlin(int seed = 0)
     {
-        var rand = new System.Random(seed);
+        var rand = new Random(seed);
         permutationTable = new byte[1024];
         rand.NextBytes(permutationTable);
     }
@@ -42,8 +42,8 @@ public class Perlin
 
     public float Noise(float fx, float fy)
     {
-        int left = (int)System.Math.Floor(fx);
-        int top = (int)System.Math.Floor(fy);
+        int left = (int)Math.Floor(fx);
+        int top = (int)Math.Floor(fy);
         float pointInQuadX = fx - left;
         float pointInQuadY = fy - top;
 
@@ -52,10 +52,10 @@ public class Perlin
         float[] bottomLeftGradient = GetPseudoRandomGradientVector(left, top + 1);
         float[] bottomRightGradient = GetPseudoRandomGradientVector(left + 1, top + 1);
 
-        float[] distanceToTopLeft = new float[] { pointInQuadX, pointInQuadY };
-        float[] distanceToTopRight = new float[] { pointInQuadX - 1, pointInQuadY };
-        float[] distanceToBottomLeft = new float[] { pointInQuadX, pointInQuadY - 1 };
-        float[] distanceToBottomRight = new float[] { pointInQuadX - 1, pointInQuadY - 1 };
+        float[] distanceToTopLeft = { pointInQuadX, pointInQuadY };
+        float[] distanceToTopRight = { pointInQuadX - 1, pointInQuadY };
+        float[] distanceToBottomLeft = { pointInQuadX, pointInQuadY - 1 };
+        float[] distanceToBottomRight = { pointInQuadX - 1, pointInQuadY - 1 };
 
         float tx1 = Dot(distanceToTopLeft, topLeftGradient);
         float tx2 = Dot(distanceToTopRight, topRightGradient);

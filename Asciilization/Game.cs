@@ -34,9 +34,10 @@ public class Game
         User32.SetLayeredWindowAttributes(consoleWindow, 0, 255, LWA_ALPHA);
         Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
         Console.Clear();
-        Map map = new Map(100, 50);
+        Map map = new Map(200, 100);
         map.Fill();
         Printing.Init(16, 8, 0, 0, 3);
+        Control.CursorInCenter(map);
         Launch(map);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
@@ -46,8 +47,7 @@ public class Game
     public static void Launch(Map map)
     {
         Generation.Map(map);
-        Generation.Rivers(map, 5, 10);
-        Generation.Civs(map, 2);
+        Generation.Rivers(map, 7, 5);
         Printing.Map(map);
     }
 }

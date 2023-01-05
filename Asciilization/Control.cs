@@ -25,7 +25,7 @@ public class Control
             {
                 OffsetDown(map);
             }
-            else if (input.Key == ConsoleKey.Z && Printing.scale < 9)
+            else if (input.Key == ConsoleKey.Z && Printing.scale < 8)
             {
                 ZoomIn(map);
             }
@@ -33,25 +33,9 @@ public class Control
             {
                 ZoomOut(map);
             }
-            else if (input.Key == ConsoleKey.Enter)
-            {
-                Regenerate(map);
-            }
             else if (input.Key == ConsoleKey.R)
             {
-                if (map.isSelected.terrain != Terrain.Water && map.isSelected.terrain != Terrain.Mountains)
-                {
-                    map.isSelected.civ = Civ.Red;
-                    Printing.Hex(map.isSelected);
-                }
-            }
-            else if (input.Key == ConsoleKey.B)
-            {
-                if (map.isSelected.terrain != Terrain.Water && map.isSelected.terrain != Terrain.Mountains)
-                {
-                    map.isSelected.civ = Civ.Blue;
-                    Printing.Hex(map.isSelected);
-                }
+                Regenerate(map);
             }
             else if (input.Key == ConsoleKey.G)
             {
@@ -100,7 +84,7 @@ public class Control
     {
         if (Printing.scale == 0)
         {
-            if (map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x)
+            if (map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x - 1 && (Printing.hexSize.x - Printing.scale) * (Console.WindowWidth / (Printing.hexSize.x - Printing.scale)) + Printing.scale < Console.WindowWidth || map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x)
             {
                 Printing.offset.x++;
                 Console.Clear();
@@ -164,7 +148,7 @@ public class Control
         }
         else
         {
-            if ((map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y - 1 && map.isSelected.coordinates.x % 2 != 0) || (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coordinates.x % 2 == 0))
+            if (map.isSelected.coordinates.y != map.hexes.GetLength(0) - 1 && (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y - 1 && map.isSelected.coordinates.x % 2 != 0 || map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coordinates.x % 2 == 0))
             {
                 Printing.offset.y++;
                 Console.Clear();
@@ -225,15 +209,6 @@ public class Control
 
     public static void CursorInCenter(Map map)
     {
-        int x0;
-        if (Printing.screenSize.x % 2 == 0)
-        {
-            x0 = map.isSelected.coordinates.x - Printing.screenSize.x / 2 + 1;
-        }
-        else
-        {
-            x0 = map.isSelected.coordinates.x - Printing.screenSize.x / 2;
-        }
         if (map.isSelected.coordinates.x <= Printing.screenSize.x / 2 - 1)
         {
             Printing.offset.x = 0;
@@ -244,16 +219,14 @@ public class Control
         }
         else
         {
-            Printing.offset.x = x0;
-        }
-        int y0;
-        if (Printing.screenSize.y % 2 == 0)
-        {
-            y0 = map.isSelected.coordinates.y - Printing.screenSize.y / 2 + 1;
-        }
-        else
-        {
-            y0 = map.isSelected.coordinates.y - Printing.screenSize.y / 2;
+            if (Printing.screenSize.x % 2 == 0)
+            {
+                Printing.offset.x = map.isSelected.coordinates.x - Printing.screenSize.x / 2 + 1;
+            }
+            else
+            {
+                Printing.offset.x = map.isSelected.coordinates.x - Printing.screenSize.x / 2;
+            }
         }
         if (map.isSelected.coordinates.y <= Printing.screenSize.y / 2 - 1)
         {
@@ -265,7 +238,14 @@ public class Control
         }
         else
         {
-            Printing.offset.y = y0;
+            if (Printing.screenSize.y % 2 == 0)
+            {
+                Printing.offset.y = map.isSelected.coordinates.y - Printing.screenSize.y / 2 + 1;
+            }
+            else
+            {
+                Printing.offset.y = map.isSelected.coordinates.y - Printing.screenSize.y / 2;
+            }
         }
     }
 

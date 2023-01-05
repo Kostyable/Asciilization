@@ -1,8 +1,4 @@
-﻿using System.IO.Pipes;
-using System.Net.Mail;
-using System.Reflection.Metadata.Ecma335;
-
-namespace Asciilization;
+﻿namespace Asciilization;
 
 public static class Generation
 {
@@ -67,9 +63,9 @@ public static class Generation
                 {
                     map.hexes[y, x].terrain = Terrain.Water;
                 }
-                else if (valueAlitude[y, x] > maxValue - 0.15f)
+                else if (valueAlitude[y, x] > maxValue - 0.17f)
                 {
-                    if (valueAlitude[y, x] < maxValue - 0.07f)
+                    if (valueAlitude[y, x] < maxValue - 0.08f)
                     {
                         if (valueRainfall[y, x] < 0.38f)
                         {
@@ -190,6 +186,10 @@ public static class Generation
                     break;
                 }
                 attempts++;
+                lastTurn = 0;
+                direction = 0;
+                index1 = 0;
+                index2 = 0;
                 continue;
             }
             index3 = index1 + 1;
@@ -216,16 +216,39 @@ public static class Generation
             }
             if (side == 0)
             {
-                AddAdditionalHexes(currentHex, river, map, index3);
-                AddAdditionalHexes(currentHex, river, map, index1);
+                flag = AddAdditionalHexes(ref currentHex, river, map, index3, index1, distance, quality);
             }
             else
             {
-                AddAdditionalHexes(currentHex, river, map, index4);
-                AddAdditionalHexes(currentHex, river, map, index2);
+                flag = AddAdditionalHexes(ref currentHex, river, map, index4, index2, distance, quality);
             }
-
-            SetReverseDirection(currentHex, river, map, direction);
+            if (flag)
+            {
+                if (isRegenerate)
+                {
+                    break;
+                }
+                attempts++;
+                lastTurn = 0;
+                direction = 0;
+                index1 = 0;
+                index2 = 0;
+                continue;
+            }
+            flag = SetReverseDirection(ref currentHex, river, map, direction, distance, quality);
+            if (flag)
+            {
+                if (isRegenerate)
+                {
+                    break;
+                }
+                attempts++;
+                lastTurn = 0;
+                direction = 0;
+                index1 = 0;
+                index2 = 0;
+                continue;
+            }
             if (map.hexes[neighbors[direction].y, neighbors[direction].x].terrain == Terrain.Water)
             {
                 return;
@@ -282,35 +305,93 @@ public static class Generation
         return value - 3;
     }
 
-    public static void AddAdditionalHexes(Hex hex, River river, Map map, int value)
+    public static bool AddAdditionalHexes(ref Hex hex, River river, Map map, int value1, int value2, int distance, int quality)
     {
-        reverseValue = GetReverseValue(value);
-        if (river.additionalHexes.Contains(map.hexes[neighbors[value].y, neighbors[value].x]))
+        int i;
+        int attempts = 0;
+        bool flag;
+        if (river.additionalHexes.Contains(map.hexes[neighbors[value1].y, neighbors[value1].x]))
+        {
+            river.directions.Add(hex, value1);
+        }
+        else if (map.hexes[neighbors[value1].y, neighbors[value1].x].terrain != Terrain.Water && map.hexes[neighbors[value1].y, neighbors[value1].x].terrain != Terrain.Mountains && !river.mainHexes.Contains(map.hexes[neighbors[value1].y, neighbors[value1].x]))
+        {
+            reverseValue = GetReverseValue(value1);
+            river.additionalHexes.Add(map.hexes[neighbors[value1].y, neighbors[value1].x]);
+            river.directions.Add(map.hexes[neighbors[value1].y, neighbors[value1].x], reverseValue);
+        }
+        if (river.additionalHexes.Contains(map.hexes[neighbors[value2].y, neighbors[value2].x]))
         {
             if (river.directions.ContainsKey(hex))
             {
-                return;
+                riverSources.Clear();
+                river.Clear();
+                while (true)
+                {
+                    i = random.Next(sources.Count);
+                    flag = AddRiverSources(sources[i], distance);
+                    if (flag)
+                    {
+                        if (attempts == quality)
+                        {
+                            isRegenerate = true;
+                            return true;
+                        }
+                        attempts++;
+                    }
+                    else
+                    {
+                        hex = sources[i];
+                        return true;
+                    }
+                }
             }
-            river.directions.Add(hex, value);
+            river.directions.Add(hex, value2);
         }
-        else if (map.hexes[neighbors[value].y, neighbors[value].x].terrain != Terrain.Water && map.hexes[neighbors[value].y, neighbors[value].x].terrain != Terrain.Mountains && !river.mainHexes.Contains(map.hexes[neighbors[value].y, neighbors[value].x]))
+        else if (map.hexes[neighbors[value2].y, neighbors[value2].x].terrain != Terrain.Water && map.hexes[neighbors[value2].y, neighbors[value2].x].terrain != Terrain.Mountains && !river.mainHexes.Contains(map.hexes[neighbors[value2].y, neighbors[value2].x]))
         {
-            river.additionalHexes.Add(map.hexes[neighbors[value].y, neighbors[value].x]);
-            river.directions.Add(map.hexes[neighbors[value].y, neighbors[value].x], reverseValue);
+            reverseValue = GetReverseValue(value2);
+            river.additionalHexes.Add(map.hexes[neighbors[value2].y, neighbors[value2].x]);
+            river.directions.Add(map.hexes[neighbors[value2].y, neighbors[value2].x], reverseValue);
         }
+        return false;
     }
 
-    public static void SetReverseDirection(Hex hex, River river, Map map, int value)
+    public static bool SetReverseDirection(ref Hex hex, River river, Map map, int value, int distance, int quality)
     {
+        int i;
+        int attempts = 0;
+        bool flag;
         reverseValue = GetReverseValue(value);
         if (river.additionalHexes.Contains(map.hexes[neighbors[reverseValue].y, neighbors[reverseValue].x]))
         {
             if (river.directions.ContainsKey(hex))
             {
-                return;
+                riverSources.Clear();
+                river.Clear();
+                while (true)
+                {
+                    i = random.Next(sources.Count);
+                    flag = AddRiverSources(sources[i], distance);
+                    if (flag)
+                    {
+                        if (attempts == quality)
+                        {
+                            isRegenerate = true;
+                            return true;
+                        }
+                        attempts++;
+                    }
+                    else
+                    {
+                        hex = sources[i];
+                        return true;
+                    }
+                }
             }
             river.directions.Add(hex, reverseValue);
         }
+        return false;
     }
 
     public static void InitNeighbors(Hex hex, Coordinates[] arr, Map map)
@@ -401,15 +482,10 @@ public static class Generation
                     }
                     else
                     {
-                        break;
+                        hex = sources[j];
+                        return true;
                     }
                 }
-                hex = sources[j];
-                lastTurn = 0;
-                direction = 0;
-                index1 = 0;
-                index2 = 0;
-                return true;
             }
         }
         for (int i = 0; i < neighbors.Length; i++)
@@ -516,20 +592,20 @@ public static class Generation
         return false;
     }
 
-    public static void Civs(Map map, int count)
-    {
-        int i = 0;
-        int randX;
-        int randY;
-        while (i < count)
-        {
-            randX = random.Next(map.hexes.GetLength(1));
-            randY = random.Next(map.hexes.GetLength(0));
-            if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
-            {
-                map.hexes[randY, randX].civ = (Civ)i + 1;
-                i++;
-            }
-        }
-    }
+    // public static void Civs(Map map, int count)
+    // {
+    //     int i = 0;
+    //     int randX;
+    //     int randY;
+    //     while (i < count)
+    //     {
+    //         randX = random.Next(map.hexes.GetLength(1));
+    //         randY = random.Next(map.hexes.GetLength(0));
+    //         if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
+    //         {
+    //             map.hexes[randY, randX].civ = (Civ)i + 1;
+    //             i++;
+    //         }
+    //     }
+    // }
 }

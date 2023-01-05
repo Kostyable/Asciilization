@@ -26,6 +26,8 @@ public class Printing
 
     public static void Map(Map map)
     {
+        Console.SetCursorPosition(0, 0);
+        Console.Write($"{screenSize.x} {screenSize.y}");
         if (offset.x == 0 || offset.y == 0)
         {
             FantomHex(offset.x - 1, offset.y - 1);
@@ -129,7 +131,7 @@ public class Printing
 
     public static void Hex(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         SetBackgroundColor(hex);
         for (int i = 0; i < hexSize.y / 2; i++)
         {
@@ -149,7 +151,7 @@ public class Printing
 
     public static void HalfHex(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         SetBackgroundColor(hex);
         int bU = 0;
         int bD = 0;
@@ -175,10 +177,14 @@ public class Printing
             {
                 bL = -(cursor.x + j);
             }
-            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
-            for (int k = bL; k < hexSize.x - bR - 2 * j; k++)
+            if (Console.WindowWidth - scale == cursor.x && j == scale)
             {
-                if (k % 2 == 0)
+                continue;
+            }
+            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
+            for (int l = bL; l < hexSize.x - bR - 2 * j; l++)
+            {
+                if (l % 2 == 0)
                 {
                     HalfPrintChar(hex);
                 }
@@ -192,7 +198,7 @@ public class Printing
     
     public static void FantomHex(int x, int y)
     {
-        cursor = CountCursorPosition(x, y);
+        CountCursorPosition(x, y);
         int bU = 0;
         int bD = 0;
         int bL = 0;
@@ -219,10 +225,14 @@ public class Printing
             {
                 bL = -(cursor.x + j);
             }
-            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
-            for (int k = bL; k < hexSize.x - bR - 2 * j; k++)
+            if (Console.WindowWidth - scale == cursor.x && j == scale)
             {
-                if (k % 2 == 0)
+                continue;
+            }
+            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
+            for (int l = bL; l < hexSize.x - bR - 2 * j; l++)
+            {
+                if (l % 2 == 0)
                 {
                     Console.Write("~");
                 }
@@ -243,7 +253,7 @@ public class Printing
             {
                 if (i != -1 && i < map.hexes.GetLength(0) && j != -1 && j != map.hexes.GetLength(1))
                 {
-                    if (map.hexes[i, j].riverDir != 6 && scale != 0)
+                    if (map.hexes[i, j].riverDir != 6 && scale > 0)
                     {
                         River(map.hexes[i, j], map);
                     }
@@ -255,7 +265,7 @@ public class Printing
     public static void River(Hex hex, Map map)
     {
         int delta;
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         if (hex.coordinates.x % 2 == 0)
         {
             delta = 0;
@@ -396,7 +406,7 @@ public class Printing
 
     public static void Cursor(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         Console.Write("\x1b[38;2;" + 255 + ";" + 255 + ";" + 255 + "m");
         if (cursor.y > 0)
         {
@@ -420,14 +430,10 @@ public class Printing
             Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
             Console.Write("\\");
         }
-
-        if (scale > 0 || hex.coordinates.x - offset.x != screenSize.x)
-        {
-            Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-            Console.Write("\\");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write("/");
-        }
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
+        Console.Write("\\");
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
+        Console.Write("/");
         for (int i = 0; i < scale; i++)
         {
             Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
@@ -445,7 +451,7 @@ public class Printing
 
     public static void NotCursor(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         if (cursor.y > 0)
         {
             for (int i = 0; i < scale + 1; i++)
@@ -488,7 +494,7 @@ public class Printing
     
     public static void Grid(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         Console.Write("\x1b[38;2;" + 135 + ";" + 135 + ";" + 135 + "m");
         if (cursor.y > 0)
         {
@@ -512,14 +518,10 @@ public class Printing
             Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
             Console.Write("\\");
         }
-
-        if (scale > 0 || hex.coordinates.x - offset.x != screenSize.x)
-        {
-            Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-            Console.Write("\\");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write("/");
-        }
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
+        Console.Write("\\");
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
+        Console.Write("/");
         for (int i = 0; i < scale; i++)
         {
             Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
@@ -537,7 +539,7 @@ public class Printing
 
     public static void NotGrid(Hex hex)
     {
-        cursor = CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
+        CountCursorPosition(hex.coordinates.x, hex.coordinates.y);
         if (cursor.y > 0)
         {
             for (int i = 0; i < scale + 1; i++)
@@ -582,7 +584,7 @@ public class Printing
     {
         for (int i = Console.WindowWidth / (hexSize.x - scale); i >= 0; i--)
         {
-            if ((hexSize.x - scale) * i < Console.WindowWidth)
+            if ((hexSize.x - scale) * i + scale < Console.WindowWidth || (hexSize.x - scale) * i + scale == Console.WindowWidth && scale != 0)
             {
                 screenSize.x = i;
                 break;
@@ -590,7 +592,7 @@ public class Printing
         }
         for (int i = Console.WindowHeight / hexSize.y; i >= 0; i--)
         {
-            if (hexSize.y * i + hexSize.y / 2 < Console.WindowHeight)
+            if (hexSize.y * i + hexSize.y / 2 <= Console.WindowHeight)
             {
                 screenSize.y = i;
                 break;
@@ -598,9 +600,8 @@ public class Printing
         }
     }
 
-    public static Coordinates CountCursorPosition(int x, int y)
+    public static void CountCursorPosition(int x, int y)
     {
-        Coordinates cursor;
         cursor.x = (x - offset.x) * (hexSize.x - scale);
         if (x % 2 == 0)
         {
@@ -610,7 +611,6 @@ public class Printing
         {
             cursor.y = (y - offset.y) * hexSize.y + hexSize.y / 2;
         }
-        return cursor;
     }
     
     public static void PrintChar(Hex hex)
