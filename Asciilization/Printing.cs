@@ -127,6 +127,8 @@ public class Printing
             HalfHex(map.hexes[screenSize.y + offset.y + 1, screenSize.x + offset.x]);
         }
         Rivers(map);
+        Console.SetCursorPosition(0, 0);
+        Console.Write($"{screenSize.x} {screenSize.y}");
     }
 
     public static void Hex(Hex hex)

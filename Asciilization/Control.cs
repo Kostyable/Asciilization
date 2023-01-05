@@ -262,7 +262,7 @@ public class Control
                         Printing.Grid(map.hexes[i, j]);
                     }
                 }
-                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.screenSize.x + Printing.offset.x != map.hexes.GetLength(1))
+                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.hexSize.x * Printing.screenSize.x + Printing.hexSize.x == Console.WindowWidth)
                 {
                     Printing.Grid(map.hexes[i, Printing.screenSize.x + Printing.offset.x]);
                 }
@@ -279,7 +279,7 @@ public class Control
                         Printing.NotGrid(map.hexes[i, j]);
                     }
                 }
-                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.screenSize.x + Printing.offset.x != map.hexes.GetLength(1))
+                if (Printing.scale == 0 && i != Printing.screenSize.y + Printing.offset.y && Printing.hexSize.x * Printing.screenSize.x + Printing.hexSize.x == Console.WindowWidth)
                 {
                     Printing.NotGrid(map.hexes[i, Printing.screenSize.x + Printing.offset.x]);
                 }
