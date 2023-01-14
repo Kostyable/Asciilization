@@ -4,24 +4,25 @@ public class Control
 {
     public static ConsoleKeyInfo input;
     public static bool isGrid;
+    
     public static void Map(Map map)
     {
         while (true)
         {
             Move(map);
-            if (input.Key == ConsoleKey.LeftArrow && map.isSelected.coordinates.x > 0)
+            if (input.Key == ConsoleKey.LeftArrow && map.isSelected.coord.x > 0)
             {
                 OffsetLeft(map);
             }
-            else if (input.Key == ConsoleKey.RightArrow && map.isSelected.coordinates.x < map.hexes.GetLength(1) - 1)
+            else if (input.Key == ConsoleKey.RightArrow && map.isSelected.coord.x < map.hexes.GetLength(1) - 1)
             {
                 OffsetRight(map);
             }
-            else if (input.Key == ConsoleKey.UpArrow && map.isSelected.coordinates.y > 0)
+            else if (input.Key == ConsoleKey.UpArrow && map.isSelected.coord.y > 0)
             {
                 OffsetUp(map);
             }
-            else if (input.Key == ConsoleKey.DownArrow && map.isSelected.coordinates.y < map.hexes.GetLength(0) - 1)
+            else if (input.Key == ConsoleKey.DownArrow && map.isSelected.coord.y < map.hexes.GetLength(0) - 1)
             {
                 OffsetDown(map);
             }
@@ -49,6 +50,7 @@ public class Control
             }
         }
     }
+    
     public static void Move(Map map)
     {
         Printing.Cursor(map.isSelected);
@@ -59,9 +61,10 @@ public class Control
             Printing.Grid(map.isSelected);
         }
     }
+    
     public static void OffsetLeft(Map map)
     {
-        if (map.isSelected.coordinates.x - Printing.offset.x == 0)
+        if (map.isSelected.coord.x - Printing.offset.x == 0)
         {
             Printing.offset.x--;
             Console.Clear();
@@ -71,20 +74,21 @@ public class Control
                 Grid(map);
             }
         }
-        if (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coordinates.x % 2 == 0)
+        if (map.isSelected.coord.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coord.x % 2 == 0)
         {
-            map.isSelected = map.hexes[map.isSelected.coordinates.y - 1, map.isSelected.coordinates.x - 1];
+            map.isSelected = map.hexes[map.isSelected.coord.y - 1, map.isSelected.coord.x - 1];
         }
         else
         {
-            map.isSelected = map.hexes[map.isSelected.coordinates.y, map.isSelected.coordinates.x - 1];
+            map.isSelected = map.hexes[map.isSelected.coord.y, map.isSelected.coord.x - 1];
         }
     }
+    
     public static void OffsetRight(Map map)
     {
         if (Printing.scale == 0)
         {
-            if (map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x - 1 && (Printing.hexSize.x - Printing.scale) * (Console.WindowWidth / (Printing.hexSize.x - Printing.scale)) + Printing.scale < Console.WindowWidth || map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x)
+            if (map.isSelected.coord.x - Printing.offset.x == Printing.screenSize.x - 1 && (Printing.hexSize.x - Printing.scale) * (Console.WindowWidth / (Printing.hexSize.x - Printing.scale)) + Printing.scale < Console.WindowWidth || map.isSelected.coord.x - Printing.offset.x == Printing.screenSize.x)
             {
                 Printing.offset.x++;
                 Console.Clear();
@@ -97,7 +101,7 @@ public class Control
         }
         else
         {
-            if (map.isSelected.coordinates.x - Printing.offset.x == Printing.screenSize.x - 1)
+            if (map.isSelected.coord.x - Printing.offset.x == Printing.screenSize.x - 1)
             {
                 Printing.offset.x++;
                 Console.Clear();
@@ -108,18 +112,19 @@ public class Control
                 }
             }
         }
-        if (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coordinates.x % 2 == 0)
+        if (map.isSelected.coord.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coord.x % 2 == 0)
         {
-            map.isSelected = map.hexes[map.isSelected.coordinates.y - 1, map.isSelected.coordinates.x + 1];
+            map.isSelected = map.hexes[map.isSelected.coord.y - 1, map.isSelected.coord.x + 1];
         }
         else
         {
-            map.isSelected = map.hexes[map.isSelected.coordinates.y, map.isSelected.coordinates.x + 1];
+            map.isSelected = map.hexes[map.isSelected.coord.y, map.isSelected.coord.x + 1];
         }
     }
+    
     public static void OffsetUp(Map map)
     {
-        if (map.isSelected.coordinates.y - Printing.offset.y == 0)
+        if (map.isSelected.coord.y - Printing.offset.y == 0)
         {
             Printing.offset.y--;
             Console.Clear();
@@ -129,13 +134,14 @@ public class Control
                 Grid(map);
             }
         }
-        map.isSelected = map.hexes[map.isSelected.coordinates.y - 1, map.isSelected.coordinates.x];
+        map.isSelected = map.hexes[map.isSelected.coord.y - 1, map.isSelected.coord.x];
     }
+    
     public static void OffsetDown(Map map)
     {
         if (Console.WindowHeight - Printing.hexSize.y * Printing.screenSize.y < Printing.hexSize.y)
         {
-            if (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y - 1)
+            if (map.isSelected.coord.y - Printing.offset.y == Printing.screenSize.y - 1)
             {
                 Printing.offset.y++;
                 Console.Clear();
@@ -148,7 +154,7 @@ public class Control
         }
         else
         {
-            if (map.isSelected.coordinates.y != map.hexes.GetLength(0) - 1 && (map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y - 1 && map.isSelected.coordinates.x % 2 != 0 || map.isSelected.coordinates.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coordinates.x % 2 == 0))
+            if (map.isSelected.coord.y != map.hexes.GetLength(0) - 1 && (map.isSelected.coord.y - Printing.offset.y == Printing.screenSize.y - 1 && map.isSelected.coord.x % 2 != 0 || map.isSelected.coord.y - Printing.offset.y == Printing.screenSize.y && map.isSelected.coord.x % 2 == 0))
             {
                 Printing.offset.y++;
                 Console.Clear();
@@ -159,8 +165,9 @@ public class Control
                 }
             }
         }
-        map.isSelected = map.hexes[map.isSelected.coordinates.y + 1, map.isSelected.coordinates.x];
+        map.isSelected = map.hexes[map.isSelected.coord.y + 1, map.isSelected.coord.x];
     }
+    
     public static void ZoomIn(Map map)
     {
         Printing.Init(Printing.hexSize.x + 4, Printing.hexSize.y + 2, Printing.scale + 1);
@@ -172,6 +179,7 @@ public class Control
             Grid(map);
         }
     }
+    
     public static void ZoomOut(Map map)
     {
         Printing.Init(Printing.hexSize.x - 4, Printing.hexSize.y - 2, Printing.scale - 1);
@@ -187,6 +195,7 @@ public class Control
             Grid(map);
         }
     }
+    
     public static void Regenerate(Map map)
     {
         Console.Clear();
@@ -206,14 +215,14 @@ public class Control
             Grid(map);
         }
     }
-
+    
     public static void CursorInCenter(Map map)
     {
-        if (map.isSelected.coordinates.x <= Printing.screenSize.x / 2 - 1)
+        if (map.isSelected.coord.x <= Printing.screenSize.x / 2 - 1)
         {
             Printing.offset.x = 0;
         }
-        else if (map.isSelected.coordinates.x >= map.hexes.GetLength(1) - Printing.screenSize.x / 2 - 1)
+        else if (map.isSelected.coord.x >= map.hexes.GetLength(1) - Printing.screenSize.x / 2 - 1)
         {
             Printing.offset.x = map.hexes.GetLength(1) - Printing.screenSize.x;
         }
@@ -221,18 +230,18 @@ public class Control
         {
             if (Printing.screenSize.x % 2 == 0)
             {
-                Printing.offset.x = map.isSelected.coordinates.x - Printing.screenSize.x / 2 + 1;
+                Printing.offset.x = map.isSelected.coord.x - Printing.screenSize.x / 2 + 1;
             }
             else
             {
-                Printing.offset.x = map.isSelected.coordinates.x - Printing.screenSize.x / 2;
+                Printing.offset.x = map.isSelected.coord.x - Printing.screenSize.x / 2;
             }
         }
-        if (map.isSelected.coordinates.y <= Printing.screenSize.y / 2 - 1)
+        if (map.isSelected.coord.y <= Printing.screenSize.y / 2 - 1)
         {
             Printing.offset.y = 0;
         }
-        else if (map.isSelected.coordinates.y >= map.hexes.GetLength(0) - Printing.screenSize.y / 2 - 1)
+        else if (map.isSelected.coord.y >= map.hexes.GetLength(0) - Printing.screenSize.y / 2 - 1)
         {
             Printing.offset.y = map.hexes.GetLength(0) - Printing.screenSize.y;
         }
@@ -240,15 +249,15 @@ public class Control
         {
             if (Printing.screenSize.y % 2 == 0)
             {
-                Printing.offset.y = map.isSelected.coordinates.y - Printing.screenSize.y / 2 + 1;
+                Printing.offset.y = map.isSelected.coord.y - Printing.screenSize.y / 2 + 1;
             }
             else
             {
-                Printing.offset.y = map.isSelected.coordinates.y - Printing.screenSize.y / 2;
+                Printing.offset.y = map.isSelected.coord.y - Printing.screenSize.y / 2;
             }
         }
     }
-
+    
     public static void Grid(Map map)
     {
         if (isGrid)

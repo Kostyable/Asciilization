@@ -4,12 +4,12 @@ public class Map
 {
     public Hex[,] hexes;
     public Hex isSelected;
-
+    
     public Map(int xLen, int yLen)
     {
         hexes = new Hex[yLen, xLen];
     }
-
+    
     public void Fill()
     {
         for (int i = 0; i < hexes.GetLength(0); i++)
@@ -35,6 +35,5 @@ public class Map
         {
             isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2];
         }
-        
     }
 }

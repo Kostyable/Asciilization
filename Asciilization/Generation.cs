@@ -63,9 +63,9 @@ public static class Generation
                 {
                     map.hexes[y, x].terrain = Terrain.Water;
                 }
-                else if (valueAlitude[y, x] > maxValue - 0.17f)
+                else if (valueAlitude[y, x] > maxValue - 0.15f)
                 {
-                    if (valueAlitude[y, x] < maxValue - 0.08f)
+                    if (valueAlitude[y, x] < maxValue - 0.07f)
                     {
                         if (valueRainfall[y, x] < 0.38f)
                         {
@@ -108,7 +108,7 @@ public static class Generation
         double distY = Math.Abs(y - map.hexes.GetLength(0) / 2 + 1) / (double)(map.hexes.GetLength(0) / 2);
         return Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));
     }
-
+    
     public static void Frame(Map map)
     {
         for (int i = 0; i < map.hexes.GetLength(0); i++)
@@ -122,7 +122,7 @@ public static class Generation
             map.hexes[map.hexes.GetLength(0) - 1, j].terrain = Terrain.Water;
         }
     }
-
+    
     public static void Rivers(Map map, int distance, int quality)
     {
         int i;
@@ -156,7 +156,7 @@ public static class Generation
         }
         SetRivers(map);
     }
-
+    
     public static void GenerateRiver(Hex hex, River river, Map map, int distance, int quality)
     {
         int attempts = 0;
@@ -256,7 +256,7 @@ public static class Generation
             currentHex = map.hexes[neighbors[direction].y, neighbors[direction].x];
         }
     }
-
+    
     public static void SetRivers(Map map)
     {
         foreach (River river in rivers)
@@ -275,7 +275,7 @@ public static class Generation
             }
         }
     }
-
+    
     public static int GetStartIndex(int index1, int index2, int index3, int index4, Map map)
     {
         float max = 0f;
@@ -295,7 +295,7 @@ public static class Generation
         }
         return maxIndex;
     }
-
+    
     public static int GetReverseValue(int value)
     {
         if (value < 3)
@@ -304,7 +304,7 @@ public static class Generation
         }
         return value - 3;
     }
-
+    
     public static bool AddAdditionalHexes(ref Hex hex, River river, Map map, int value1, int value2, int distance, int quality)
     {
         int i;
@@ -356,7 +356,7 @@ public static class Generation
         }
         return false;
     }
-
+    
     public static bool SetReverseDirection(ref Hex hex, River river, Map map, int value, int distance, int quality)
     {
         int i;
@@ -393,14 +393,14 @@ public static class Generation
         }
         return false;
     }
-
+    
     public static void InitNeighbors(Hex hex, Coordinates[] arr, Map map)
     {
         if (sources.Contains(hex))
         {
             riverSources.Add(hex);
         }
-        if (hex.coordinates.x % 2 == 0)
+        if (hex.coord.x % 2 == 0)
         {
             delta = 0;
         }
@@ -408,12 +408,12 @@ public static class Generation
         {
             delta = 1;
         }
-        arr[0] = new Coordinates(hex.coordinates.x, hex.coordinates.y - 1);
-        arr[1] = new Coordinates(hex.coordinates.x - 1, hex.coordinates.y - 1 + delta);
-        arr[2] = new Coordinates(hex.coordinates.x - 1, hex.coordinates.y + delta);
-        arr[3] = new Coordinates(hex.coordinates.x, hex.coordinates.y + 1);
-        arr[4] = new Coordinates(hex.coordinates.x + 1, hex.coordinates.y + delta);
-        arr[5] = new Coordinates(hex.coordinates.x + 1, hex.coordinates.y - 1 + delta);
+        arr[0] = new Coordinates(hex.coord.x, hex.coord.y - 1);
+        arr[1] = new Coordinates(hex.coord.x - 1, hex.coord.y - 1 + delta);
+        arr[2] = new Coordinates(hex.coord.x - 1, hex.coord.y + delta);
+        arr[3] = new Coordinates(hex.coord.x, hex.coord.y + 1);
+        arr[4] = new Coordinates(hex.coord.x + 1, hex.coord.y + delta);
+        arr[5] = new Coordinates(hex.coord.x + 1, hex.coord.y - 1 + delta);
         for (int i = 0; i < arr.Length; i++)
         {
             if (arr[i].x != -1 && arr[i].x != map.hexes.GetLength(1) && arr[i].y != -1 && arr[i].y != map.hexes.GetLength(0))
@@ -447,7 +447,7 @@ public static class Generation
         }
         return false;
     }
-
+    
     public static bool SetRiverDirection(ref Hex hex, River river, Map map, ref int direction, ref int index1, ref int index2, ref int lastTurn, int distance, int quality)
     {
         InitNeighbors(hex, neighbors, map);
@@ -536,7 +536,7 @@ public static class Generation
         }
         return false;
     }
-
+    
     public static bool FixCollisions(Hex hex, River riv)
     {
         foreach (River river in rivers)
@@ -563,7 +563,7 @@ public static class Generation
         }
         return 0;
     }
-
+    
     public static void DeleteSources()
     {
         foreach (Hex hex in riverSources)
@@ -580,7 +580,7 @@ public static class Generation
     {
         for (int i = 0; i < sources.Count; i++)
         {
-            if (Math.Abs(sources[i].coordinates.x - hex.coordinates.x) <= distance && Math.Abs(sources[i].coordinates.y - hex.coordinates.y) <= distance && sources[i] != hex)
+            if (Math.Abs(sources[i].coord.x - hex.coord.x) <= distance && Math.Abs(sources[i].coord.y - hex.coord.y) <= distance && sources[i] != hex)
             {
                 riverSources.Add(sources[i]);
             }
@@ -591,21 +591,49 @@ public static class Generation
         }
         return false;
     }
-
-    // public static void Civs(Map map, int count)
-    // {
-    //     int i = 0;
-    //     int randX;
-    //     int randY;
-    //     while (i < count)
-    //     {
-    //         randX = random.Next(map.hexes.GetLength(1));
-    //         randY = random.Next(map.hexes.GetLength(0));
-    //         if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
-    //         {
-    //             map.hexes[randY, randX].civ = (Civ)i + 1;
-    //             i++;
-    //         }
-    //     }
-    // }
+    
+    public static void Civs(Map map, int count)
+    {
+        int i = 0;
+        int randX;
+        int randY;
+        Hex[] hexNeighbors = new Hex[6];
+        bool nearWater;
+        while (i < count)
+        {
+            nearWater = false;
+            randX = random.Next(map.hexes.GetLength(1));
+            randY = random.Next(map.hexes.GetLength(0));
+            if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
+            {
+                if (map.hexes[randY, randX].coord.x % 2 == 0)
+                {
+                    delta = 0;
+                }
+                else
+                {
+                    delta = 1;
+                }
+                hexNeighbors[0] = map.hexes[randY - 1, randX];
+                hexNeighbors[1] = map.hexes[randY - 1 + delta, randX - 1];
+                hexNeighbors[2] = map.hexes[randY + delta, randX - 1];
+                hexNeighbors[3] = map.hexes[randY + 1, randX];
+                hexNeighbors[4] = map.hexes[randY + delta, randX + 1];
+                hexNeighbors[5] = map.hexes[randY - 1 + delta, randX + 1];
+                for (int j = 0; j < hexNeighbors.Length; j++)
+                {
+                    if (hexNeighbors[j].terrain == Terrain.Water)
+                    {
+                        nearWater = true;
+                        break;
+                    }
+                }
+                if (map.hexes[randY, randX].withRiver || nearWater)
+                {
+                    map.hexes[randY, randX].civ = (Civ)i + 1;
+                    i++;
+                }
+            }
+        }
+    }
 }

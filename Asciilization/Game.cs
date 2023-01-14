@@ -8,15 +8,18 @@ public class Game
 {
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
+    
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern bool GetConsoleMode(IntPtr handle, out int mode);
+    
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern IntPtr GetStdHandle(int handle);
+    
     const int GWL_EXSTYLE = -20;
     const int WS_EX_LAYERED = 0x80000;
     const int LWA_ALPHA = 0x2;
     const int LWA_COLORKEY = 0x1;
-
+    
     public static void Main(string[] args)
     {
         Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
@@ -34,7 +37,7 @@ public class Game
         User32.SetLayeredWindowAttributes(consoleWindow, 0, 255, LWA_ALPHA);
         Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
         Console.Clear();
-        Map map = new Map(200, 100);
+        Map map = new Map(100, 50);
         map.Fill();
         Printing.Init(16, 8, 0, 0, 3);
         Control.CursorInCenter(map);
@@ -43,11 +46,12 @@ public class Game
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
         Control.Map(map);
     }
-
+    
     public static void Launch(Map map)
     {
         Generation.Map(map);
         Generation.Rivers(map, 7, 5);
+        Generation.Civs(map, 2);
         Printing.Map(map);
     }
 }
