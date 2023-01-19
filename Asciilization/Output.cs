@@ -10,8 +10,8 @@ public class Output
     public static int scale;
     public static Coordinates cursor;
     public static string[,] matrix;
-    public static Color backColor;
-    public static Color foreColor;
+    public static int backColor;
+    public static int foreColor;
     public static string ch;
     public static StringBuilder sb;
     public static int k;
@@ -158,22 +158,22 @@ public class Output
             {
                 if (j % 2 == 0)
                 {
-                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
+                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch;
                 }
                 else
                 {
-                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
+                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + " ";
                 }
             }
             for (int j = 0; j < hexSize.x - 2 * i; j++)
             {
                 if (j % 2 == 0)
                 {
-                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
+                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch;
                 }
                 else
                 {
-                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
+                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + " ";
                 }
             }
         }
@@ -216,11 +216,11 @@ public class Output
             {
                 if (j % 2 == 0)
                 {
-                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch;
                 }
                 else
                 {
-                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + " ";
                 }
             }
         }
@@ -260,11 +260,11 @@ public class Output
             {
                 if (j % 2 == 0)
                 {
-                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m" + "~";
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;5;" + 16 + "m\x1b[38;5;" + 20 + "m" + "~";
                 }
                 else
                 {
-                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m" + " ";
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;5;" + 16 + "m\x1b[38;5;" + 20 + "m" + " ";
                 }
             }
         }
@@ -307,12 +307,12 @@ public class Output
                     if (cursor.y >= 0 && cursor.y < Console.WindowHeight)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                     if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
-                        matrix[cursor.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -326,12 +326,12 @@ public class Output
                     if (cursor.x + scale - i >= 0 && cursor.x + scale - i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y + i, cursor.x + scale - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + i, cursor.x + scale - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                     if (cursor.x + scale - i - 2 >= 0 && cursor.x + scale - i - 2 < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
-                        matrix[cursor.y + i, cursor.x + scale - i - 2] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + i, cursor.x + scale - i - 2] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -345,13 +345,13 @@ public class Output
                     if (cursor.x + i >= 0 && cursor.x + i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
 
                     if (cursor.x + i - 2 >= 0 && cursor.x + i - 2 < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
-                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i - 2] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i - 2] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -365,12 +365,12 @@ public class Output
                     if (cursor.y + hexSize.y - 1 >= 0 && cursor.y + hexSize.y - 1 < Console.WindowHeight)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y + hexSize.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                     if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y + 1, hex.coord.x]);
-                        matrix[cursor.y + hexSize.y, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -384,12 +384,12 @@ public class Output
                     if (cursor.x + hexSize.x - scale - 2 + i >= 0 && cursor.x + hexSize.x - scale - 2 + i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale - 2 + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale - 2 + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                     if (cursor.x + hexSize.x - scale + i >= 0 && cursor.x + hexSize.x - scale + i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x + 1]);
-                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -403,13 +403,13 @@ public class Output
                     if (cursor.x + hexSize.x - 2 - i >= 0 && cursor.x + hexSize.x - 2 - i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(hex);
-                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - 2 - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - 2 - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
 
                     if (cursor.x + hexSize.x - i >= 0 && cursor.x + hexSize.x - i < Console.WindowWidth)
                     {
                         backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x + 1]);
-                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
+                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
                     }
                 }
             }
@@ -638,33 +638,33 @@ public class Output
         }
     }
     
-    public static Color SetForegroundColor(Hex hex)
+    public static int SetForegroundColor(Hex hex)
     {
         switch (hex.terrain)
         {
             case Terrain.Water:
-                return new Color(0, 0, 200);
+                return 20;
             case Terrain.Plain: case Terrain.PlainHills:
-                return new Color(0, 200, 0);
+                return 40;
             case Terrain.Desert: case Terrain.DesertHills:
-                return new Color(200, 200, 0);
+                return 184;
             case Terrain.Forest:
-                return new Color(0, 175, 0);
+                return 34;
             default:
-                return new Color(175, 175, 175);
+                return 145;
         }
     }
     
-    public static Color SetBackgroundColor(Hex hex)
+    public static int SetBackgroundColor(Hex hex)
     {
         switch (hex.civ)
         {
             case Civ.Red:
-                return new Color(100, 0, 0);
+                return 88;
             case Civ.Blue:
-                return new Color(0, 0, 100);
+                return 18;
             default:
-                return new Color(0, 0, 0);
+                return 16;
         }
     }
 }
