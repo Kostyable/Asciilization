@@ -39,7 +39,7 @@ public class Game
         Console.Clear();
         Map map = new Map(100, 50);
         map.Fill();
-        Printing.Init(16, 8, 0, 0, 3);
+        Output.Init(16, 8, 0, 0, 3);
         Control.CursorInCenter(map);
         Launch(map);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
@@ -52,6 +52,6 @@ public class Game
         Generation.Map(map);
         Generation.Rivers(map, 7, 5);
         Generation.Civs(map, 2);
-        Printing.Map(map);
+        Output.Map(map);
     }
 }

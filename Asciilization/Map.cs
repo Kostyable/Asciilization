@@ -19,15 +19,15 @@ public class Map
                 hexes[i, j] = new Hex(j, i);
             }
         }
-        if (Printing.screenSize.x % 2 == 0 && Printing.screenSize.y % 2 == 0)
+        if (Output.screenSize.x % 2 == 0 && Output.screenSize.y % 2 == 0)
         {
             isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2 + 1];
         }
-        else if (Printing.screenSize.x % 2 == 0)
+        else if (Output.screenSize.x % 2 == 0)
         {
             isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2 + 1];
         }
-        else if (Printing.screenSize.y % 2 == 0)
+        else if (Output.screenSize.y % 2 == 0)
         {
             isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2];
         }

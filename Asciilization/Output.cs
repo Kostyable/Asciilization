@@ -1,12 +1,19 @@
-﻿namespace Asciilization;
+﻿using System.Text;
 
-public class Printing
+namespace Asciilization;
+
+public class Output
 {
     public static Coordinates hexSize;
     public static Coordinates screenSize;
     public static Coordinates offset;
     public static int scale;
     public static Coordinates cursor;
+    public static string[,] matrix;
+    public static Color backColor;
+    public static Color foreColor;
+    public static char ch;
+    public static StringBuilder sb;
     public static int k;
     
     public static void Init(int hexSizeX, int hexSizeY, int offsetX, int offsetY, int sc)
@@ -15,6 +22,8 @@ public class Printing
         offset = new Coordinates(offsetX, offsetY);
         scale = sc;
         SetScreenSize();
+        matrix = new string[Console.WindowHeight, Console.WindowWidth];
+        sb = new StringBuilder();
     }
     
     public static void Init(int hexSizeX, int hexSizeY, int sc)
@@ -125,24 +134,42 @@ public class Printing
             HalfHex(map.hexes[screenSize.y + offset.y + 1, screenSize.x + offset.x]);
         }
         Rivers(map);
+        foreach (string s in matrix)
+        {
+            sb.Append(s);
+        }
+        Console.Write(sb);
     }
     
     public static void Hex(Hex hex)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
-        SetBackgroundColor(hex);
+        backColor = SetBackgroundColor(hex);
+        foreColor = SetForegroundColor(hex);
+        ch = SetChar(hex);
         for (int i = 0; i < hexSize.y / 2; i++)
         {
-            k = scale - i;
-            Console.SetCursorPosition(cursor.x + k, cursor.y + i);
-            for (int j = 0; j < hexSize.x - 2 * k; j += 2)
+            for (int j = 0; j < hexSize.x - 2 * (scale - i); j++)
             {
-                PrintChar(hex);
+                if (j % 2 == 0)
+                {
+                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
+                }
+                else
+                {
+                    matrix[cursor.y + i, cursor.x + scale - i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
+                }
             }
-            Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y / 2 + i);
-            for (int j = 0; j < hexSize.x - 2 * i; j += 2)
+            for (int j = 0; j < hexSize.x - 2 * i; j++)
             {
-                PrintChar(hex);
+                if (j % 2 == 0)
+                {
+                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
+                }
+                else
+                {
+                    matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
+                }
             }
         }
     }
@@ -150,12 +177,13 @@ public class Printing
     public static void HalfHex(Hex hex)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
-        SetBackgroundColor(hex);
+        backColor = SetBackgroundColor(hex);
+        foreColor = SetForegroundColor(hex);
+        ch = SetChar(hex);
         int bU = 0;
         int bD = 0;
         int bL = 0;
         int bR = 0;
-        int j;
         if (Console.WindowHeight - cursor.y < hexSize.y)
         {
             bD = hexSize.y - (Console.WindowHeight - cursor.y);
@@ -166,29 +194,28 @@ public class Printing
         }
         for (int i = bU; i < hexSize.y - bD; i++)
         {
-            j = Math.Abs(scale - i) - i / (hexSize.y / 2);
+            k = Math.Abs(scale - i) - i / (hexSize.y / 2);
             if (Console.WindowWidth - cursor.x < hexSize.x)
             {
-                bR = hexSize.x - (Console.WindowWidth - cursor.x + j);
+                bR = hexSize.x - (Console.WindowWidth - cursor.x + k);
             }
             if (cursor.x < 0)
             {
-                bL = -(cursor.x + j);
+                bL = -(cursor.x + k);
             }
-            if (Console.WindowWidth - scale == cursor.x && j == scale)
+            if (Console.WindowWidth - scale == cursor.x && k == scale)
             {
                 continue;
             }
-            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
-            for (int l = bL; l < hexSize.x - bR - 2 * j; l++)
+            for (int j = bL; j < hexSize.x - bR - 2 * k; j++)
             {
-                if (l % 2 == 0)
+                if (j % 2 == 0)
                 {
-                    HalfPrintChar(hex);
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + ch;
                 }
                 else
                 {
-                    Console.Write(" ");
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + foreColor.r + ";" + foreColor.g + ";" + foreColor.b + "m" + " ";
                 }
             }
         }
@@ -201,7 +228,6 @@ public class Printing
         int bD = 0;
         int bL = 0;
         int bR = 0;
-        int j;
         if (Console.WindowHeight - cursor.y < hexSize.y)
         {
             bD = hexSize.y - (Console.WindowHeight - cursor.y);
@@ -210,33 +236,30 @@ public class Printing
         {
             bU = -cursor.y;
         }
-        Console.Write("\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m");
-        Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
         for (int i = bU; i < hexSize.y - bD; i++)
         {
-            j = Math.Abs(scale - i) - i / (hexSize.y / 2);
+            k = Math.Abs(scale - i) - i / (hexSize.y / 2);
             if (Console.WindowWidth - cursor.x < hexSize.x)
             {
-                bR = hexSize.x - (Console.WindowWidth - cursor.x + j);
+                bR = hexSize.x - (Console.WindowWidth - cursor.x + k);
             }
             if (cursor.x < 0)
             {
-                bL = -(cursor.x + j);
+                bL = -(cursor.x + k);
             }
-            if (Console.WindowWidth - scale == cursor.x && j == scale)
+            if (Console.WindowWidth - scale == cursor.x && k == scale)
             {
                 continue;
             }
-            Console.SetCursorPosition(cursor.x + j + bL, cursor.y + i);
-            for (int l = bL; l < hexSize.x - bR - 2 * j; l++)
+            for (int j = bL; j < hexSize.x - bR - 2 * k; j++)
             {
-                if (l % 2 == 0)
+                if (j % 2 == 0)
                 {
-                    Console.Write("~");
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m" + "~";
                 }
                 else
                 {
-                    Console.Write(" ");
+                    matrix[cursor.y + i, cursor.x + k + j] = "\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m" + " ";
                 }
             }
         }
@@ -244,7 +267,6 @@ public class Printing
     
     public static void Rivers(Map map)
     {
-        Console.Write("\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m");
         for (int i = offset.y - 1; i < screenSize.y + offset.y + 2; i++)
         {
             for (int j = offset.x - 1; j < screenSize.x + offset.x + 1; j++)
@@ -280,15 +302,13 @@ public class Printing
                 {
                     if (cursor.y >= 0 && cursor.y < Console.WindowHeight)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                     if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
-                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y - 1);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+                        matrix[cursor.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -301,15 +321,13 @@ public class Printing
                 {
                     if (cursor.x + scale - i >= 0 && cursor.x + scale - i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + scale - i, cursor.y + i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y + i, cursor.x + scale - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                     if (cursor.x + scale - i - 2 >= 0 && cursor.x + scale - i - 2 < Console.WindowWidth)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
-                        Console.SetCursorPosition(cursor.x + scale - i - 2, cursor.y + i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+                        matrix[cursor.y + i, cursor.x + scale - i - 2] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -322,16 +340,14 @@ public class Printing
                 {
                     if (cursor.x + i >= 0 && cursor.x + i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y / 2 + i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
 
                     if (cursor.x + i - 2 >= 0 && cursor.x + i - 2 < Console.WindowWidth)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
-                        Console.SetCursorPosition(cursor.x + i - 2, cursor.y + hexSize.y / 2 + i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+                        matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i - 2] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -344,15 +360,13 @@ public class Printing
                 {
                     if (cursor.y + hexSize.y - 1 >= 0 && cursor.y + hexSize.y - 1 < Console.WindowHeight)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y - 1);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y + hexSize.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                     if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y + 1, hex.coord.x]);
-                        Console.SetCursorPosition(cursor.x + scale + 2 * i, cursor.y + hexSize.y);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + 1, hex.coord.x]);
+                        matrix[cursor.y + hexSize.y, cursor.x + scale + 2 * i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -365,15 +379,13 @@ public class Printing
                 {
                     if (cursor.x + hexSize.x - scale - 2 + i >= 0 && cursor.x + hexSize.x - scale - 2 + i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + hexSize.x - scale - 2 + i, cursor.y + hexSize.y - 1 - i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale - 2 + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                     if (cursor.x + hexSize.x - scale + i >= 0 && cursor.x + hexSize.x - scale + i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x + 1]);
-                        Console.SetCursorPosition(cursor.x + hexSize.x - scale + i, cursor.y + hexSize.y - 1 - i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x + 1]);
+                        matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale + i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -386,16 +398,14 @@ public class Printing
                 {
                     if (cursor.x + hexSize.x - 2 - i >= 0 && cursor.x + hexSize.x - 2 - i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(hex);
-                        Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y / 2 - 1 - i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(hex);
+                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - 2 - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
 
                     if (cursor.x + hexSize.x - i >= 0 && cursor.x + hexSize.x - i < Console.WindowWidth)
                     {
-                        SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x + 1]);
-                        Console.SetCursorPosition(cursor.x + hexSize.x - i, cursor.y + hexSize.y / 2 - 1 - i);
-                        Console.Write("~");
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x + 1]);
+                        matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - i] = "\x1b[48;2;" + backColor.r + ";" + backColor.g + ";" + backColor.b + "m\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~";
                     }
                 }
             }
@@ -611,75 +621,46 @@ public class Printing
         }
     }
     
-    public static void PrintChar(Hex hex)
+    public static char SetChar(Hex hex)
+    {
+        switch (hex.terrain)
+        {
+            case Terrain.Water: case Terrain.Plain: case Terrain.Desert:
+                return '~';
+            case Terrain.Forest:
+                return '@';
+            default:
+                return 'A';
+        }
+    }
+    
+    public static Color SetForegroundColor(Hex hex)
     {
         switch (hex.terrain)
         {
             case Terrain.Water:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~ ");
-                break;
-            case Terrain.Plain:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 200 + ";" + 0 + "m~ ");
-                break;
-            case Terrain.Desert:
-                Console.Write("\x1b[38;2;" + 200 + ";" + 200 + ";" + 0 + "m~ ");
-                break;
+                return new Color(0, 0, 200);
+            case Terrain.Plain: case Terrain.PlainHills:
+                return new Color(0, 200, 0);
+            case Terrain.Desert: case Terrain.DesertHills:
+                return new Color(200, 200, 0);
             case Terrain.Forest:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 175 + ";" + 0 + "m@ ");
-                break;
-            case Terrain.PlainHills:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 200 + ";" + 0 + "mA ");
-                break;
-            case Terrain.DesertHills:
-                Console.Write("\x1b[38;2;" + 200 + ";" + 200 + ";" + 0 + "mA ");
-                break;
-            case Terrain.Mountains:
-                Console.Write("\x1b[38;2;" + 175 + ";" + 175 + ";" + 175 + "mA ");
-                break;
+                return new Color(0, 175, 0);
+            default:
+                return new Color(175, 175, 175);
         }
     }
     
-    public static void HalfPrintChar(Hex hex)
-    {
-        switch (hex.terrain)
-        {
-            case Terrain.Water:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 0 + ";" + 200 + "m~");
-                break;
-            case Terrain.Plain:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 200 + ";" + 0 + "m~");
-                break;
-            case Terrain.Desert:
-                Console.Write("\x1b[38;2;" + 200 + ";" + 200 + ";" + 0 + "m~");
-                break;
-            case Terrain.Forest:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 175 + ";" + 0 + "m@");
-                break;
-            case Terrain.PlainHills:
-                Console.Write("\x1b[38;2;" + 0 + ";" + 200 + ";" + 0 + "mA");
-                break;
-            case Terrain.DesertHills:
-                Console.Write("\x1b[38;2;" + 200 + ";" + 200 + ";" + 0 + "mA");
-                break;
-            case Terrain.Mountains:
-                Console.Write("\x1b[38;2;" + 175 + ";" + 175 + ";" + 175 + "mA");
-                break;
-        }
-    }
-    
-    public static void SetBackgroundColor(Hex hex)
+    public static Color SetBackgroundColor(Hex hex)
     {
         switch (hex.civ)
         {
             case Civ.Red:
-                Console.Write("\x1b[48;2;" + 100 + ";" + 0 + ";" + 0 + "m");
-                break;
+                return new Color(100, 0, 0);
             case Civ.Blue:
-                Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 100 + "m");
-                break;
+                return new Color(0, 0, 100);
             default:
-                Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
-                break;
+                return new Color(0, 0, 0);
         }
     }
 }
