@@ -12,9 +12,14 @@ public class Output
     public static string[,] matrix;
     public static Color backColor;
     public static Color foreColor;
-    public static char ch;
+    public static string ch;
     public static StringBuilder sb;
     public static int k;
+    public static int bU;
+    public static int bD;
+    public static int bL;
+    public static int bR;
+    public static int delta;
     
     public static void Init(int hexSizeX, int hexSizeY, int offsetX, int offsetY, int sc)
     {
@@ -180,10 +185,10 @@ public class Output
         backColor = SetBackgroundColor(hex);
         foreColor = SetForegroundColor(hex);
         ch = SetChar(hex);
-        int bU = 0;
-        int bD = 0;
-        int bL = 0;
-        int bR = 0;
+        bU = 0;
+        bD = 0;
+        bL = 0;
+        bR = 0;
         if (Console.WindowHeight - cursor.y < hexSize.y)
         {
             bD = hexSize.y - (Console.WindowHeight - cursor.y);
@@ -224,10 +229,10 @@ public class Output
     public static void FantomHex(int x, int y)
     {
         CountCursorPosition(x, y);
-        int bU = 0;
-        int bD = 0;
-        int bL = 0;
-        int bR = 0;
+        bU = 0;
+        bD = 0;
+        bL = 0;
+        bR = 0;
         if (Console.WindowHeight - cursor.y < hexSize.y)
         {
             bD = hexSize.y - (Console.WindowHeight - cursor.y);
@@ -284,7 +289,6 @@ public class Output
     
     public static void River(Hex hex, Map map)
     {
-        int delta;
         CountCursorPosition(hex.coord.x, hex.coord.y);
         if (hex.coord.x % 2 == 0)
         {
@@ -621,16 +625,16 @@ public class Output
         }
     }
     
-    public static char SetChar(Hex hex)
+    public static string SetChar(Hex hex)
     {
         switch (hex.terrain)
         {
             case Terrain.Water: case Terrain.Plain: case Terrain.Desert:
-                return '~';
+                return "~";
             case Terrain.Forest:
-                return '@';
+                return "@";
             default:
-                return 'A';
+                return "A";
         }
     }
     

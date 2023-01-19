@@ -35,8 +35,6 @@ public class Game
         IntPtr consoleWindow = User32.GetForegroundWindow();
         User32.SetWindowLong(consoleWindow, GWL_EXSTYLE, (int)User32.GetWindowLong(consoleWindow, GWL_EXSTYLE) ^ WS_EX_LAYERED);
         User32.SetLayeredWindowAttributes(consoleWindow, 0, 255, LWA_ALPHA);
-        Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
-        Console.Clear();
         Map map = new Map(100, 50);
         map.Fill();
         Output.Init(16, 8, 0, 0, 3);
