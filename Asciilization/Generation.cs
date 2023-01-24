@@ -3,13 +3,16 @@
 public static class Generation
 {
     public static float[,] valueAlitude;
-    public static float[,] valueRainfall;
-    public static float maxValue;
+    public static float[,] valueLatitude;
+    public static float[,] valueWoodiness;
+    public static float maxValueA;
+    public static float maxValueL;
     public static Random random = new Random();
     public static float sid = random.Next(1, 9999999);
     public static float zoom = 10f;
     public static Perlin altitude = new Perlin();
-    public static Perlin rainfall = new Perlin();
+    public static Perlin latitude = new Perlin();
+    public static Perlin woodiness = new Perlin();
     public static Coordinates[] neighbors = new Coordinates[6];
     public static Coordinates[] nextNeighbors = new Coordinates[6];
     public static int delta;
@@ -24,7 +27,7 @@ public static class Generation
     public static void Map(Map map)
     {
         valueAlitude = new float[map.hexes.GetLength(0), map.hexes.GetLength(1)];
-        maxValue = 0f;
+        maxValueA = 0f;
         for (int y = 0; y < map.hexes.GetLength(0); y++)
         {
             for (int x = 0; x < map.hexes.GetLength(1); x++)
@@ -35,23 +38,46 @@ public static class Generation
                 {
                     valueAlitude[y, x] = 0f;
                 }
-                if (valueAlitude[y, x] > maxValue)
+                if (valueAlitude[y, x] > maxValueA)
                 {
-                    maxValue = valueAlitude[y, x];
+                    maxValueA = valueAlitude[y, x];
                 }
             }
         }
         sid = random.Next(1, 9999999);
-        valueRainfall = new float[map.hexes.GetLength(0), map.hexes.GetLength(1)];
+        valueLatitude = new float[map.hexes.GetLength(0), map.hexes.GetLength(1)];
+        maxValueL = 0f;
         for (int y = 0; y < map.hexes.GetLength(0); y++)
         {
             for (int x = 0; x < map.hexes.GetLength(1); x++)
             {
                 float nx = (x + sid) / zoom + 0.5f, ny = (y + sid) / zoom + 0.5f;
-                valueRainfall[y, x] = (rainfall.Noise(nx, ny) + 1f) / 2f;
-                if (valueRainfall[y, x] < 0f)
+                valueLatitude[y, x] = (latitude.Noise(nx, ny) + 1f) / 2f - (float)Latitude(map, y);
+                if (valueLatitude[y, x] < 0f)
                 {
-                    valueRainfall[y, x] = 0f;
+                    valueLatitude[y, x] = 0f;
+                }
+                if (valueLatitude[y, x] > 1f)
+                {
+                    valueLatitude[y, x] = 1f;
+                }
+                if (valueLatitude[y, x] > maxValueL)
+                {
+                    maxValueL = valueLatitude[y, x];
+                }
+            }
+        }
+        sid = random.Next(1, 9999999);
+        valueWoodiness = new float[map.hexes.GetLength(0), map.hexes.GetLength(1)];
+        for (int y = 0; y < map.hexes.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.hexes.GetLength(1); x++)
+            {
+                float nx = (x + sid) / zoom + 0.5f, ny = (y + sid) / zoom + 0.5f;
+                valueWoodiness[y, x] = (woodiness.Noise(nx, ny) + 1f) / 2f;
+                if (valueWoodiness[y, x] < 0f)
+                {
+                    valueWoodiness[y, x] = 0f;
                 }
             }
         }
@@ -63,17 +89,17 @@ public static class Generation
                 {
                     map.hexes[y, x].terrain = Terrain.Water;
                 }
-                else if (valueAlitude[y, x] > maxValue - 0.15f)
+                else if (valueAlitude[y, x] > maxValueA - 0.13f)
                 {
-                    if (valueAlitude[y, x] < maxValue - 0.07f)
+                    if (valueAlitude[y, x] < maxValueA - 0.07f)
                     {
-                        if (valueRainfall[y, x] < 0.38f)
+                        if (valueLatitude[y, x] < maxValueL - 0.25f)
                         {
-                            map.hexes[y, x].terrain = Terrain.DesertHills;
+                            map.hexes[y, x].terrain = Terrain.PlainHills;
                         }
                         else
                         {
-                            map.hexes[y, x].terrain = Terrain.PlainHills;
+                            map.hexes[y, x].terrain = Terrain.DesertHills;
                         }
                         sources.Add(map.hexes[y, x]);
                     }
@@ -84,17 +110,20 @@ public static class Generation
                 }
                 else
                 {
-                    if (valueRainfall[y, x] < 0.38f)
+                    if (valueLatitude[y, x] < maxValueL - 0.25f)
                     {
-                        map.hexes[y, x].terrain = Terrain.Desert;
-                    }
-                    else if (valueRainfall[y, x] > 0.58f)
-                    {
-                        map.hexes[y, x].terrain = Terrain.Forest;
+                        if (valueWoodiness[y, x] >= 0.57f && valueLatitude[y, x] < maxValueL - 0.4f)
+                        {
+                            map.hexes[y, x].terrain = Terrain.Forest;
+                        }
+                        else
+                        {
+                            map.hexes[y, x].terrain = Terrain.Plain;
+                        }
                     }
                     else
                     {
-                        map.hexes[y, x].terrain = Terrain.Plain;
+                        map.hexes[y, x].terrain = Terrain.Desert;
                     }
                 }
             }
@@ -107,6 +136,12 @@ public static class Generation
         double distX = Math.Abs(x - map.hexes.GetLength(1) / 2 + 1) / (double)(map.hexes.GetLength(1) / 2);
         double distY = Math.Abs(y - map.hexes.GetLength(0) / 2 + 1) / (double)(map.hexes.GetLength(0) / 2);
         return Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));
+    }
+    
+    public static double Latitude(Map map, int y)
+    {
+        double currentY = Math.Abs(y - map.hexes.GetLength(0) / 2 + 1) / (double)(map.hexes.GetLength(0) / 2);
+        return currentY;
     }
     
     public static void Frame(Map map)
@@ -599,9 +634,11 @@ public static class Generation
         int randY;
         Hex[] hexNeighbors = new Hex[6];
         bool nearWater;
+        bool neighborCiv;
         while (i < count)
         {
             nearWater = false;
+            neighborCiv = false;
             randX = random.Next(map.hexes.GetLength(1));
             randY = random.Next(map.hexes.GetLength(0));
             if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
@@ -627,8 +664,12 @@ public static class Generation
                         nearWater = true;
                         break;
                     }
+                    if (hexNeighbors[j].civ != Civ.Without)
+                    {
+                        neighborCiv = true;
+                    }
                 }
-                if (map.hexes[randY, randX].withRiver || nearWater)
+                if ((map.hexes[randY, randX].withRiver || nearWater) && !neighborCiv)
                 {
                     map.hexes[randY, randX].civ = (Civ)i + 1;
                     i++;

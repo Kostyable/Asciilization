@@ -49,7 +49,7 @@ public class Game
     {
         Generation.Map(map);
         Generation.Rivers(map, 7, 5);
-        Generation.Civs(map, 2);
+        Generation.Civs(map, 4);
         Output.Map(map);
     }
 }

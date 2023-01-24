@@ -629,12 +629,12 @@ public class Output
     {
         switch (hex.terrain)
         {
-            case Terrain.Water: case Terrain.Plain: case Terrain.Desert:
-                return "~";
             case Terrain.Forest:
                 return "@";
-            default:
+            case Terrain.PlainHills: case Terrain.DesertHills: case Terrain.Mountains:
                 return "A";
+            default:
+                return "~";
         }
     }
     
@@ -642,16 +642,16 @@ public class Output
     {
         switch (hex.terrain)
         {
-            case Terrain.Water:
-                return 20;
             case Terrain.Plain: case Terrain.PlainHills:
                 return 40;
             case Terrain.Desert: case Terrain.DesertHills:
                 return 184;
             case Terrain.Forest:
                 return 34;
-            default:
+            case Terrain.Mountains:
                 return 145;
+            default:
+                return 20;
         }
     }
     
@@ -661,8 +661,12 @@ public class Output
         {
             case Civ.Red:
                 return 88;
-            case Civ.Blue:
-                return 18;
+            case Civ.Orange:
+                return 130;
+            case Civ.Cian:
+                return 30;
+            case Civ.Magenta:
+                return 91;
             default:
                 return 16;
         }

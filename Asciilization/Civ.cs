@@ -4,5 +4,7 @@ public enum Civ
 {
     Without,
     Red,
-    Blue,
+    Orange,
+    Cian,
+    Magenta,
 }
