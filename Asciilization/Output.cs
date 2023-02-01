@@ -114,6 +114,14 @@ public class Output
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
                         }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
                         if (indentR > 0)
                         {
                             if (j < map.hexes.GetLength(1))
@@ -187,6 +195,14 @@ public class Output
                         else
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
+                        }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
                         }
                         if (indentR > 0)
                         {
@@ -308,6 +324,14 @@ public class Output
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
                         }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
                         if (indentR > 0)
                         {
                             if (i < map.hexes.GetLength(0))
@@ -413,6 +437,14 @@ public class Output
                         else
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
+                        }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
                         }
                         if (indentR > 0)
                         {
@@ -502,6 +534,14 @@ public class Output
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
                         }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
                         if (indentR > 0)
                         {
                             if (j < map.hexes.GetLength(1))
@@ -575,6 +615,14 @@ public class Output
                         else
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
+                        }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
                         }
                         if (indentR > 0)
                         {
@@ -696,6 +744,14 @@ public class Output
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
                         }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
+                        }
                         if (indentR > 0)
                         {
                             if (i < map.hexes.GetLength(0))
@@ -801,6 +857,14 @@ public class Output
                         else
                         {
                             indentR = Console.WindowWidth - ((hexSize.x - scale) * (j - offset.x) + scale) + indentL;
+                        }
+                        if (j % 2 == 0 && indentR > hexSize.x - lim2)
+                        {
+                            indentR = hexSize.x - lim2;
+                        }
+                        else if (j % 2 != 0 && indentR > hexSize.x - lim1)
+                        {
+                            indentR = hexSize.x - lim1;
                         }
                         if (indentR > 0)
                         {
@@ -1150,7 +1214,7 @@ public class Output
     {
         for (int i = Console.WindowWidth / (hexSize.x - scale); i >= 0; i--)
         {
-            if ((hexSize.x - scale) * i + scale < Console.WindowWidth || (hexSize.x - scale) * i + scale == Console.WindowWidth && scale != 0)
+            if ((hexSize.x - scale) * i + scale <= Console.WindowWidth)
             {
                 screenSize.x = i;
                 break;

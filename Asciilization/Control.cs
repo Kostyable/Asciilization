@@ -87,32 +87,15 @@ public class Control
     
     public static void OffsetRight(Map map)
     {
-        if (Output.scale == 0)
+        if (map.isSelected.coord.x - Output.offset.x == Output.screenSize.x - 1)
         {
-            if (map.isSelected.coord.x - Output.offset.x == Output.screenSize.x - 1 && (Output.hexSize.x - Output.scale) * (Console.WindowWidth / (Output.hexSize.x - Output.scale)) + Output.scale < Console.WindowWidth || map.isSelected.coord.x - Output.offset.x == Output.screenSize.x)
+            Output.offset.x++;
+            Output.sb.Clear();
+            Console.SetCursorPosition(0, 0);
+            Output.Map(map);
+            if (isGrid)
             {
-                Output.offset.x++;
-                Output.sb.Clear();
-                Console.SetCursorPosition(0, 0);
-                Output.Map(map);
-                if (isGrid)
-                {
-                    Grid(map);
-                }
-            }
-        }
-        else
-        {
-            if (map.isSelected.coord.x - Output.offset.x == Output.screenSize.x - 1)
-            {
-                Output.offset.x++;
-                Output.sb.Clear();
-                Console.SetCursorPosition(0, 0);
-                Output.Map(map);
-                if (isGrid)
-                {
-                    Grid(map);
-                }
+                Grid(map);
             }
         }
         if (map.isSelected.coord.y - Output.offset.y == Output.screenSize.y && map.isSelected.coord.x % 2 == 0)
@@ -191,10 +174,6 @@ public class Control
     {
         Output.Init(Output.hexSize.x - 4, Output.hexSize.y - 2, Output.scale - 1);
         CursorInCenter(map);
-        if (Output.scale == 0 && Output.offset.x == map.hexes.GetLength(1) - Output.screenSize.x)
-        {
-            Output.offset.x--;
-        }
         Output.sb.Clear();
         Console.SetCursorPosition(0, 0);
         Output.Map(map);
