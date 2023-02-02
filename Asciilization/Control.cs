@@ -50,6 +50,17 @@ public class Control
             }
         }
     }
+
+    public static void Rewrite(Map map)
+    {
+        Output.sb.Clear();
+        Console.SetCursorPosition(0, 0);
+        Output.Map(map);
+        if (isGrid)
+        {
+            Grid(map);
+        }
+    }
     
     public static void Move(Map map)
     {
@@ -67,13 +78,7 @@ public class Control
         if (map.isSelected.coord.x - Output.offset.x == 0)
         {
             Output.offset.x--;
-            Output.sb.Clear();
-            Console.SetCursorPosition(0, 0);
-            Output.Map(map);
-            if (isGrid)
-            {
-                Grid(map);
-            }
+            Rewrite(map);
         }
         if (map.isSelected.coord.y - Output.offset.y == Output.screenSize.y && map.isSelected.coord.x % 2 == 0)
         {
@@ -90,13 +95,7 @@ public class Control
         if (map.isSelected.coord.x - Output.offset.x == Output.screenSize.x - 1)
         {
             Output.offset.x++;
-            Output.sb.Clear();
-            Console.SetCursorPosition(0, 0);
-            Output.Map(map);
-            if (isGrid)
-            {
-                Grid(map);
-            }
+            Rewrite(map);
         }
         if (map.isSelected.coord.y - Output.offset.y == Output.screenSize.y && map.isSelected.coord.x % 2 == 0)
         {
@@ -113,13 +112,7 @@ public class Control
         if (map.isSelected.coord.y - Output.offset.y == 0)
         {
             Output.offset.y--;
-            Output.sb.Clear();
-            Console.SetCursorPosition(0, 0);
-            Output.Map(map);
-            if (isGrid)
-            {
-                Grid(map);
-            }
+            Rewrite(map);
         }
         map.isSelected = map.hexes[map.isSelected.coord.y - 1, map.isSelected.coord.x];
     }
@@ -131,13 +124,7 @@ public class Control
             if (map.isSelected.coord.y - Output.offset.y == Output.screenSize.y - 1)
             {
                 Output.offset.y++;
-                Output.sb.Clear();
-                Console.SetCursorPosition(0, 0);
-                Output.Map(map);
-                if (isGrid)
-                {
-                    Grid(map);
-                }
+                Rewrite(map);
             }
         }
         else
@@ -145,13 +132,7 @@ public class Control
             if (map.isSelected.coord.y != map.hexes.GetLength(0) - 1 && (map.isSelected.coord.y - Output.offset.y == Output.screenSize.y - 1 && map.isSelected.coord.x % 2 != 0 || map.isSelected.coord.y - Output.offset.y == Output.screenSize.y && map.isSelected.coord.x % 2 == 0))
             {
                 Output.offset.y++;
-                Output.sb.Clear();
-                Console.SetCursorPosition(0, 0);
-                Output.Map(map);
-                if (isGrid)
-                {
-                    Grid(map);
-                }
+                Rewrite(map);
             }
         }
         map.isSelected = map.hexes[map.isSelected.coord.y + 1, map.isSelected.coord.x];
@@ -161,26 +142,14 @@ public class Control
     {
         Output.Init(Output.hexSize.x + 4, Output.hexSize.y + 2, Output.scale + 1);
         CursorInCenter(map);
-        Output.sb.Clear();
-        Console.SetCursorPosition(0, 0);
-        Output.Map(map);
-        if (isGrid)
-        {
-            Grid(map);
-        }
+        Rewrite(map);
     }
     
     public static void ZoomOut(Map map)
     {
         Output.Init(Output.hexSize.x - 4, Output.hexSize.y - 2, Output.scale - 1);
         CursorInCenter(map);
-        Output.sb.Clear();
-        Console.SetCursorPosition(0, 0);
-        Output.Map(map);
-        if (isGrid)
-        {
-            Grid(map);
-        }
+        Rewrite(map);
     }
     
     public static void Regenerate(Map map)
@@ -196,7 +165,6 @@ public class Control
         Generation.rivers.Clear();
         Output.sb.Clear();
         Console.SetCursorPosition(0, 0);
-        Console.Write("\x1b[48;2;" + 0 + ";" + 0 + ";" + 0 + "m");
         Game.Launch(map);
         if (isGrid)
         {
