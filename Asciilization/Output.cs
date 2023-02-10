@@ -9,11 +9,15 @@ public class Output
     public static Coordinates offset;
     public static int scale;
     public static Coordinates cursor;
+    public static int delta;
     public static string backColor;
     public static string foreColor;
     public static string ch;
     public static string[] symbols;
-    public static StringBuilder sb;
+    public static string mapBorder;
+    public static StringBuilder hexesLayer;
+    public static StringBuilder riversLayer;
+    public static StringBuilder uiLayer;
     
     public static void Init(int hexSizeX, int hexSizeY, int offsetX, int offsetY, int sc)
     {
@@ -22,7 +26,10 @@ public class Output
         scale = sc;
         SetScreenSize();
         symbols = new string[3];
-        sb = new StringBuilder();
+        mapBorder = "\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m";
+        hexesLayer = new StringBuilder();
+        riversLayer = new StringBuilder();
+        uiLayer = new StringBuilder();
         InitSymbols();
     }
     
@@ -37,7 +44,10 @@ public class Output
     public static void Map(Map map)
     {
         Hexes(map);
-        Console.Write(sb);
+        Rivers(map);
+        Console.Write(hexesLayer);
+        Console.SetCursorPosition(0, 0);
+        Console.Write(riversLayer);
     }
 
     public static void Hexes(Map map)
@@ -60,25 +70,25 @@ public class Output
                             backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                             foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                             ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else if (i > 0)
                         {
                             backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                             foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                             ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
                             ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -89,19 +99,19 @@ public class Output
                             backColor = SetBackgroundColor(map.hexes[i, j]);
                             foreColor = SetForegroundColor(map.hexes[i, j]);
                             ch = SetChar(map.hexes[i, j], lim1);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else if (i > 0)
                         {
                             backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                             foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                             ch = SetChar(map.hexes[i - 1, j], lim2);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
                             ch = SetChar(map.hexes[0, 0], lim2);
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
@@ -131,25 +141,25 @@ public class Output
                                     backColor = SetBackgroundColor(map.hexes[i, j]);
                                     foreColor = SetForegroundColor(map.hexes[i, j]);
                                     ch = SetChar(map.hexes[i, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else if (i > 0)
                                 {
                                     backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                     foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                     ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -163,12 +173,12 @@ public class Output
                         backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                         foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                         ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -184,7 +194,7 @@ public class Output
                         {
                             ch = SetChar(map.hexes[i, j], lim2);
                         }
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
                     {
@@ -211,12 +221,12 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], 0, indentR);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -241,14 +251,14 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                                 ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                                 ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                         }
                         else
@@ -258,19 +268,19 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                                 ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -283,14 +293,14 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], lim1);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                 ch = SetChar(map.hexes[i - 1, j], lim2);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                         }
                         else
@@ -298,19 +308,19 @@ public class Output
                             if (j % 2 == 0)
                             {
                                 ch = SetChar(map.hexes[0, 0], lim1);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                             else if (i - 1 < map.hexes.GetLength(0))
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                 ch = SetChar(map.hexes[i - 1, j], lim2);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], lim2);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -343,20 +353,20 @@ public class Output
                                         backColor = SetBackgroundColor(map.hexes[i, j]);
                                         foreColor = SetForegroundColor(map.hexes[i, j]);
                                         ch = SetChar(map.hexes[i, j], 0, indentR);
-                                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                     }
                                     else
                                     {
                                         backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                         foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                         ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                     }
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                             else
@@ -366,12 +376,12 @@ public class Output
                                     backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                     foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                     ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                         }
@@ -390,12 +400,12 @@ public class Output
                         backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                         foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                         ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -413,7 +423,7 @@ public class Output
                             {
                                 ch = SetChar(map.hexes[i, j], lim2);
                             }
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
@@ -425,7 +435,7 @@ public class Output
                             {
                                 ch = SetChar(map.hexes[0, 0], lim2);
                             }
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
@@ -453,12 +463,12 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], 0, indentR);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -480,25 +490,25 @@ public class Output
                             backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                             foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                             ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else if (i > 0)
                         {
                             backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                             foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                             ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
                             ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -509,19 +519,19 @@ public class Output
                             backColor = SetBackgroundColor(map.hexes[i, j]);
                             foreColor = SetForegroundColor(map.hexes[i, j]);
                             ch = SetChar(map.hexes[i, j], lim2);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else if (i > 0)
                         {
                             backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                             foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                             ch = SetChar(map.hexes[i - 1, j], lim1);
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
                             ch = SetChar(map.hexes[0, 0], lim1);
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
@@ -551,25 +561,25 @@ public class Output
                                     backColor = SetBackgroundColor(map.hexes[i, j]);
                                     foreColor = SetForegroundColor(map.hexes[i, j]);
                                     ch = SetChar(map.hexes[i, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else if (i > 0)
                                 {
                                     backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                     foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                     ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -583,12 +593,12 @@ public class Output
                         backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                         foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                         ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -604,7 +614,7 @@ public class Output
                         {
                             ch = SetChar(map.hexes[i, j], lim1);
                         }
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
                     {
@@ -631,12 +641,12 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], 0, indentR);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -661,14 +671,14 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                                 ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                                 ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                         }
                         else
@@ -678,19 +688,19 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i - 1, offset.x - 1]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, offset.x - 1]);
                                 ch = SetChar(map.hexes[i - 1, offset.x - 1], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -703,14 +713,14 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], lim2);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                 ch = SetChar(map.hexes[i - 1, j], lim1);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                         }
                         else
@@ -718,19 +728,19 @@ public class Output
                             if (j % 2 == 0)
                             {
                                 ch = SetChar(map.hexes[0, 0], lim2);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                             else if (i - 1 < map.hexes.GetLength(0))
                             {
                                 backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                 foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                 ch = SetChar(map.hexes[i - 1, j], lim1);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], lim1);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -763,20 +773,20 @@ public class Output
                                         backColor = SetBackgroundColor(map.hexes[i, j]);
                                         foreColor = SetForegroundColor(map.hexes[i, j]);
                                         ch = SetChar(map.hexes[i, j], 0, indentR);
-                                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                     }
                                     else
                                     {
                                         backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                         foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                         ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                     }
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                             else
@@ -786,12 +796,12 @@ public class Output
                                     backColor = SetBackgroundColor(map.hexes[i - 1, j]);
                                     foreColor = SetForegroundColor(map.hexes[i - 1, j]);
                                     ch = SetChar(map.hexes[i - 1, j], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                    hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                                 }
                                 else
                                 {
                                     ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                    sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                    hexesLayer.Append(mapBorder + ch);
                                 }
                             }
                         }
@@ -810,12 +820,12 @@ public class Output
                         backColor = SetBackgroundColor(map.hexes[i, offset.x - 1]);
                         foreColor = SetForegroundColor(map.hexes[i, offset.x - 1]);
                         ch = SetChar(map.hexes[i, offset.x - 1], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                        hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                     }
                     else
                     {
                         ch = SetChar(map.hexes[0, 0], hexSize.x - indentL);
-                        sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                        hexesLayer.Append(mapBorder + ch);
                     }
                     lim1 = 2 * indentL;
                     lim2 = 2 * (scale - indentL);
@@ -833,7 +843,7 @@ public class Output
                             {
                                 ch = SetChar(map.hexes[i, j], lim1);
                             }
-                            sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                            hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                         }
                         else
                         {
@@ -845,7 +855,7 @@ public class Output
                             {
                                 ch = SetChar(map.hexes[0, 0], lim1);
                             }
-                            sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                            hexesLayer.Append(mapBorder + ch);
                         }
                     }
                     for (int j = screenSize.x + offset.x; j < screenSize.x + offset.x + 2; j++)
@@ -873,12 +883,12 @@ public class Output
                                 backColor = SetBackgroundColor(map.hexes[i, j]);
                                 foreColor = SetForegroundColor(map.hexes[i, j]);
                                 ch = SetChar(map.hexes[i, j], 0, indentR);
-                                sb.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
+                                hexesLayer.Append("\x1b[48;5;" + backColor + "m\x1b[38;5;" + foreColor + "m" + ch);
                             }
                             else
                             {
                                 ch = SetChar(map.hexes[0, 0], 0, indentR);
-                                sb.Append("\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m" + ch);
+                                hexesLayer.Append(mapBorder + ch);
                             }
                         }
                     }
@@ -888,325 +898,607 @@ public class Output
         }
     }
     
-    // public static void Rivers(Map map)
-    // {
-    //     for (int i = offset.y - 1; i < screenSize.y + offset.y + 2; i++)
-    //     {
-    //         for (int j = offset.x - 1; j < screenSize.x + offset.x + 1; j++)
-    //         {
-    //             if (i != -1 && i < map.hexes.GetLength(0) && j != -1 && j != map.hexes.GetLength(1))
-    //             {
-    //                 if (map.hexes[i, j].riverDir != 6 && scale > 0)
-    //                 {
-    //                     River(map.hexes[i, j], map);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // public static void River(Hex hex, Map map)
-    // {
-    //     CountCursorPosition(hex.coord.x, hex.coord.y);
-    //     if (hex.coord.x % 2 == 0)
-    //     {
-    //         delta = 0;
-    //     }
-    //     else
-    //     {
-    //         delta = 1;
-    //     }
-    //     if (hex.riverDir == 0)
-    //     {
-    //         for (int i = 0; i < scale + 2; i++)
-    //         {
-    //             if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
-    //             {
-    //                 if (cursor.y >= 0 && cursor.y < Console.WindowHeight)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //                 if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
-    //                     matrix[cursor.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else if (hex.riverDir == 1)
-    //     {
-    //         for (int i = 0; i < hexSize.y / 2; i++)
-    //         {
-    //             if (cursor.y + i >= 0 && cursor.y + i < Console.WindowHeight)
-    //             {
-    //                 if (cursor.x + scale - i >= 0 && cursor.x + scale - i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y + i, cursor.x + scale - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //                 if (cursor.x + scale - i - 2 >= 0 && cursor.x + scale - i - 2 < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
-    //                     matrix[cursor.y + i, cursor.x + scale - i - 2] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else if (hex.riverDir == 2)
-    //     {
-    //         for (int i = 0; i < hexSize.y / 2; i++)
-    //         {
-    //             if (cursor.y + hexSize.y / 2 + i >= 0 && cursor.y + hexSize.y / 2 + i < Console.WindowHeight)
-    //             {
-    //                 if (cursor.x + i >= 0 && cursor.x + i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //
-    //                 if (cursor.x + i - 2 >= 0 && cursor.x + i - 2 < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
-    //                     matrix[cursor.y + hexSize.y / 2 + i, cursor.x + i - 2] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else if (hex.riverDir == 3)
-    //     {
-    //         for (int i = 0; i < scale + 2; i++)
-    //         {
-    //             if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
-    //             {
-    //                 if (cursor.y + hexSize.y - 1 >= 0 && cursor.y + hexSize.y - 1 < Console.WindowHeight)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y + hexSize.y - 1, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //                 if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y + 1, hex.coord.x]);
-    //                     matrix[cursor.y + hexSize.y, cursor.x + scale + 2 * i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else if (hex.riverDir == 4)
-    //     {
-    //         for (int i = 0; i < hexSize.y / 2; i++)
-    //         {
-    //             if (cursor.y + hexSize.y - 1 - i >= 0 && cursor.y + hexSize.y - 1 - i < Console.WindowHeight)
-    //             {
-    //                 if (cursor.x + hexSize.x - scale - 2 + i >= 0 && cursor.x + hexSize.x - scale - 2 + i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale - 2 + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //                 if (cursor.x + hexSize.x - scale + i >= 0 && cursor.x + hexSize.x - scale + i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x + 1]);
-    //                     matrix[cursor.y + hexSize.y - 1 - i, cursor.x + hexSize.x - scale + i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         for (int i = 0; i < hexSize.y / 2; i++)
-    //         {
-    //             if (cursor.y + hexSize.y / 2 - 1 - i >= 0 && cursor.y + hexSize.y / 2 - 1 - i < Console.WindowHeight)
-    //             {
-    //                 if (cursor.x + hexSize.x - 2 - i >= 0 && cursor.x + hexSize.x - 2 - i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(hex);
-    //                     matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - 2 - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //
-    //                 if (cursor.x + hexSize.x - i >= 0 && cursor.x + hexSize.x - i < Console.WindowWidth)
-    //                 {
-    //                     backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x + 1]);
-    //                     matrix[cursor.y + hexSize.y / 2 - 1 - i, cursor.x + hexSize.x - i] = "\x1b[48;5;" + backColor + "m\x1b[38;5;" + 20 + "m~";
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    public static void Rivers(Map map)
+    {
+        for (int i = offset.y - 1; i < screenSize.y + offset.y + 2; i++)
+        {
+            for (int j = offset.x - 1; j < screenSize.x + offset.x + 2; j++)
+            {
+                if (i != -1 && i < map.hexes.GetLength(0) && j != -1 && j < map.hexes.GetLength(1))
+                {
+                    if (map.hexes[i, j].riverDir != 6 && scale > 0)
+                    {
+                        River(map.hexes[i, j], map);
+                    }
+                }
+            }
+        }
+    }
     
-    public static void Cursor(Hex hex)
+    public static void River(Hex hex, Map map)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
-        Console.Write("\x1b[38;2;" + 255 + ";" + 255 + ";" + 255 + "m");
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        if (hex.riverDir == 0)
+        {
+            for (int i = 0; i < scale + 2; i++)
+            {
+                if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
+                {
+                    if (cursor.y >= 0 && cursor.y < Console.WindowHeight)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + 1) + ";" + (cursor.x + scale + 2 * i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.y - 1 >= 0 && cursor.y - 1 < Console.WindowHeight)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+                        riversLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 1)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + i >= 0 && cursor.y + i < Console.WindowHeight)
+                {
+                    if (cursor.x + scale - i >= 0 && cursor.x + scale - i < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.x + scale - i - 2 >= 0 && cursor.x + scale - i - 2 < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+                        riversLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i - 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 2)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y / 2 + i >= 0 && cursor.y + hexSize.y / 2 + i < Console.WindowHeight)
+                {
+                    if (cursor.x + i >= 0 && cursor.x + i < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y / 2 + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.x + i - 2 >= 0 && cursor.x + i - 2 < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y / 2 + i + 1) + ";" + (cursor.x + i - 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 3)
+        {
+            for (int i = 0; i < scale + 2; i++)
+            {
+                if (cursor.x + scale + 2 * i >= 0 && cursor.x + scale + 2 * i < Console.WindowWidth)
+                {
+                    if (cursor.y + hexSize.y - 1 >= 0 && cursor.y + hexSize.y - 1 < Console.WindowHeight)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.y + hexSize.y >= 0 && cursor.y + hexSize.y < Console.WindowHeight)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + 1, hex.coord.x]);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y + 1) + ";" + (cursor.x + scale + 2 * i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+        else if (hex.riverDir == 4)
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y - i - 1 >= 0 && cursor.y + hexSize.y - i - 1 < Console.WindowHeight)
+                {
+                    if (cursor.x + hexSize.x - scale + i - 2 >= 0 && cursor.x + hexSize.x - scale + i - 2 < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y - i) + ";" + (cursor.x + hexSize.x - scale + i - 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.x + hexSize.x - scale + i >= 0 && cursor.x + hexSize.x - scale + i < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x + 1]);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y - i) + ";" + (cursor.x + hexSize.x - scale + i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < hexSize.y / 2; i++)
+            {
+                if (cursor.y + hexSize.y / 2 - i - 1 >= 0 && cursor.y + hexSize.y / 2 - i - 1 < Console.WindowHeight)
+                {
+                    if (cursor.x + hexSize.x - i - 2 >= 0 && cursor.x + hexSize.x - i - 2 < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(hex);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y / 2 - i) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                    if (cursor.x + hexSize.x - i >= 0 && cursor.x + hexSize.x - i < Console.WindowWidth)
+                    {
+                        backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x + 1]);
+                        riversLayer.Append("\x1b[" + (cursor.y + hexSize.y / 2 - i) + ";" + (cursor.x + hexSize.x - i + 1) + "H\x1b[48;5;" + backColor + "m\x1b[38;5;20m~");
+                    }
+                }
+            }
+        }
+    }
+    
+    public static void Cursor(Hex hex, Map map)
+    {
+        CountCursorPosition(hex.coord.x, hex.coord.y);
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        Console.Write("\x1b[38;5;" + 231 + "m");
         if (cursor.y > 0)
         {
+            if (hex.coord.y == 0)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+            }
             for (int i = 0; i < scale + 1; i++)
             {
-                Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y - 1);
-                Console.Write("_");
+                Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y - 1);
+                Console.Write("\x1b[48;5;" + backColor + "m_");
             }
         }
         for (int i = 0; i < scale; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale - 1 - i, cursor.y + i);
-            Console.Write("/");
-            Console.SetCursorPosition(cursor.x + hexSize.x - scale - 1 + i, cursor.y + i);
-            Console.Write("\\");
+            if (hex.coord.y - 1 + delta == -1 || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x + scale - i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m/");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - scale + i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
         }
         if (cursor.x > 0)
         {
+            if (hex.coord.y - 1 + delta == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x - 1, cursor.y + scale);
-            Console.Write("/");
-            Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write("\\");
+            Console.Write("\x1b[48;5;" + backColor + "m/");
+            if (hex.coord.y + delta == map.hexes.GetLength(0))
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x - 1, cursor.y + scale + 1);
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
         }
+        backColor = SetBackgroundColor(hex);
         Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-        Console.Write("\\");
-        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-        Console.Write("/");
+        Console.Write("\x1b[48;5;" + backColor + "m\\");
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale + 1);
+        Console.Write("\x1b[48;5;" + backColor + "m/");
         for (int i = 0; i < scale; i++)
         {
+            if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
-            Console.Write("\\");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y - scale + i);
-            Console.Write("/");
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - i - 2, cursor.y + hexSize.y - scale + i);
+            Console.Write("\x1b[48;5;" + backColor + "m/");
         }
+        backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y + hexSize.y - 1);
-            Console.Write("_");
+            Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y + hexSize.y - 1);
+            Console.Write("\x1b[48;5;" + backColor + "m_");
         }
         Console.SetCursorPosition(Console.WindowWidth - 1, Console.WindowHeight - 1);
     }
     
-    public static void NotCursor(Hex hex)
+    public static void NotCursor(Hex hex, Map map)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
         if (cursor.y > 0)
         {
+            if (hex.coord.y == 0)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+            }
             for (int i = 0; i < scale + 1; i++)
             {
-                Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y - 1);
-                Console.Write(" ");
+                Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y - 1);
+                Console.Write("\x1b[48;5;" + backColor + "m ");
             }
         }
         for (int i = 0; i < scale; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale - 1 - i, cursor.y + i);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x + hexSize.x - scale - 1 + i, cursor.y + i);
-            Console.Write(" ");
+            if (hex.coord.y - 1 + delta == -1 || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x + scale - i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m ");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - scale + i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m ");
         }
         if (cursor.x > 0)
         {
+            if (hex.coord.y - 1 + delta == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x - 1, cursor.y + scale);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write(" ");
+            Console.Write("\x1b[48;5;" + backColor + "m ");
+            if (hex.coord.y + delta == map.hexes.GetLength(0))
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x - 1, cursor.y + scale + 1);
+            Console.Write("\x1b[48;5;" + backColor + "m ");
         }
+        backColor = SetBackgroundColor(hex);
         Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-        Console.Write(" ");
-        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-        Console.Write(" ");
+        Console.Write("\x1b[48;5;" + backColor + "m ");
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale + 1);
+        Console.Write("\x1b[48;5;" + backColor + "m ");
         for (int i = 0; i < scale; i++)
         {
+            if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y - scale + i);
-            Console.Write(" ");
+            Console.Write("\x1b[48;5;" + backColor + "m ");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - i - 2, cursor.y + hexSize.y - scale + i);
+            Console.Write("\x1b[48;5;" + backColor + "m ");
         }
+        backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y + hexSize.y - 1);
-            Console.Write(" ");
+            Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y + hexSize.y - 1);
+            Console.Write("\x1b[48;5;" + backColor + "m ");
         }
     }
     
-    public static void Grid(Hex hex)
+    public static void Grid(Hex hex, Map map)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
-        Console.Write("\x1b[38;2;" + 135 + ";" + 135 + ";" + 135 + "m");
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        Console.Write("\x1b[38;5;" + 102 + "m");
         if (cursor.y > 0)
         {
+            if (hex.coord.y == 0)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+            }
             for (int i = 0; i < scale + 1; i++)
             {
-                Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y - 1);
-                Console.Write("_");
+                Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y - 1);
+                Console.Write("\x1b[48;5;" + backColor + "m_");
             }
         }
         for (int i = 0; i < scale; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale - 1 - i, cursor.y + i);
-            Console.Write("/");
-            Console.SetCursorPosition(cursor.x + hexSize.x - scale - 1 + i, cursor.y + i);
-            Console.Write("\\");
+            if (hex.coord.y - 1 + delta == -1 || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x + scale - i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m/");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - scale + i - 1, cursor.y + i);
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
         }
         if (cursor.x > 0)
         {
+            if (hex.coord.y - 1 + delta == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x - 1, cursor.y + scale);
-            Console.Write("/");
-            Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write("\\");
+            Console.Write("\x1b[48;5;" + backColor + "m/");
+            if (hex.coord.y + delta == map.hexes.GetLength(0))
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            Console.SetCursorPosition(cursor.x - 1, cursor.y + scale + 1);
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
         }
+        backColor = SetBackgroundColor(hex);
         Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-        Console.Write("\\");
-        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-        Console.Write("/");
+        Console.Write("\x1b[48;5;" + backColor + "m\\");
+        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale + 1);
+        Console.Write("\x1b[48;5;" + backColor + "m/");
         for (int i = 0; i < scale; i++)
         {
+            if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
             Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
-            Console.Write("\\");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y - scale + i);
-            Console.Write("/");
+            Console.Write("\x1b[48;5;" + backColor + "m\\");
+            backColor = SetBackgroundColor(hex);
+            Console.SetCursorPosition(cursor.x + hexSize.x - i - 2, cursor.y + hexSize.y - scale + i);
+            Console.Write("\x1b[48;5;" + backColor + "m/");
         }
+        backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y + hexSize.y - 1);
-            Console.Write("_");
+            Console.SetCursorPosition(cursor.x + scale + 2 * i + 1, cursor.y + hexSize.y - 1);
+            Console.Write("\x1b[48;5;" + backColor + "m_");
         }
-        Console.SetCursorPosition(Console.WindowWidth - 1, Console.WindowHeight - 1);
     }
     
-    public static void NotGrid(Hex hex)
+    public static void SbGrid(Hex hex, Map map)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        uiLayer.Append("\x1b[38;5;102m");
         if (cursor.y > 0)
         {
+            if (hex.coord.y == 0)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+            }
             for (int i = 0; i < scale + 1; i++)
             {
-                Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y - 1);
-                Console.Write(" ");
+                uiLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
             }
         }
         for (int i = 0; i < scale; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale - 1 - i, cursor.y + i);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x + hexSize.x - scale - 1 + i, cursor.y + i);
-            Console.Write(" ");
+            if (hex.coord.y - 1 + delta == -1 || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m/");
+            backColor = SetBackgroundColor(hex);
+            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m\\");
         }
         if (cursor.x > 0)
         {
-            Console.SetCursorPosition(cursor.x - 1, cursor.y + scale);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x - 1, cursor.y + hexSize.y - scale - 1);
-            Console.Write(" ");
+            if (hex.coord.y - 1 + delta == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m/");
+            if (hex.coord.y + delta == map.hexes.GetLength(0))
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m\\");
         }
-        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + scale);
-        Console.Write(" ");
-        Console.SetCursorPosition(cursor.x + hexSize.x - 1, cursor.y + hexSize.y - scale - 1);
-        Console.Write(" ");
+        backColor = SetBackgroundColor(hex);
+        uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m\\");
+        uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m/");
         for (int i = 0; i < scale; i++)
         {
-            Console.SetCursorPosition(cursor.x + i, cursor.y + hexSize.y - scale + i);
-            Console.Write(" ");
-            Console.SetCursorPosition(cursor.x + hexSize.x - 2 - i, cursor.y + hexSize.y - scale + i);
-            Console.Write(" ");
+            if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m\\");
+            backColor = SetBackgroundColor(hex);
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m/");
         }
+        backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            Console.SetCursorPosition(cursor.x + scale + 1 + 2 * i, cursor.y + hexSize.y - 1);
-            Console.Write(" ");
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
+        }
+    }
+    
+    public static void SbNotGrid(Hex hex, Map map)
+    {
+        CountCursorPosition(hex.coord.x, hex.coord.y);
+        if (hex.coord.x % 2 == 0)
+        {
+            delta = 0;
+        }
+        else
+        {
+            delta = 1;
+        }
+        uiLayer.Append("\x1b[38;5;102m");
+        if (cursor.y > 0)
+        {
+            if (hex.coord.y == 0)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1, hex.coord.x]);
+            }
+            for (int i = 0; i < scale + 1; i++)
+            {
+                uiLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
+            }
+        }
+        for (int i = 0; i < scale; i++)
+        {
+            if (hex.coord.y - 1 + delta == -1 || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m ");
+            backColor = SetBackgroundColor(hex);
+            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m ");
+        }
+        if (cursor.x > 0)
+        {
+            if (hex.coord.y - 1 + delta == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
+            if (hex.coord.y + delta == map.hexes.GetLength(0))
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
+        }
+        backColor = SetBackgroundColor(hex);
+        uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
+        uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
+        for (int i = 0; i < scale; i++)
+        {
+            if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
+            {
+                backColor = "016";
+            }
+            else
+            {
+                backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
+            }
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m ");
+            backColor = SetBackgroundColor(hex);
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m ");
+        }
+        backColor = SetBackgroundColor(hex);
+        for (int i = 0; i < scale + 1; i++)
+        {
+            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
         }
     }
     

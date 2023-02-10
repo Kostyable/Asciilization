@@ -1,4 +1,6 @@
-﻿namespace Asciilization;
+﻿using System.Data.Common;
+
+namespace Asciilization;
 
 public class Control
 {
@@ -53,7 +55,8 @@ public class Control
 
     public static void Rewrite(Map map)
     {
-        Output.sb.Clear();
+        Output.hexesLayer.Clear();
+        Output.riversLayer.Clear();
         Console.SetCursorPosition(0, 0);
         Output.Map(map);
         if (isGrid)
@@ -64,12 +67,12 @@ public class Control
     
     public static void Move(Map map)
     {
-        Output.Cursor(map.isSelected);
+        Output.Cursor(map.isSelected, map);
         input = Console.ReadKey();
-        Output.NotCursor(map.isSelected);
+        Output.NotCursor(map.isSelected, map);
         if (isGrid)
         {
-            Output.Grid(map.isSelected);
+            Output.Grid(map.isSelected, map);
         }
     }
     
@@ -163,7 +166,8 @@ public class Control
         Generation.sources.Clear();
         Generation.riverSources.Clear();
         Generation.rivers.Clear();
-        Output.sb.Clear();
+        Output.hexesLayer.Clear();
+        Output.riversLayer.Clear();
         Console.SetCursorPosition(0, 0);
         Game.Launch(map);
         if (isGrid)
@@ -216,6 +220,7 @@ public class Control
     
     public static void Grid(Map map)
     {
+        Output.uiLayer.Clear();
         if (isGrid)
         {
             for (int i = Output.offset.y; i <= Output.screenSize.y + Output.offset.y; i++)
@@ -224,12 +229,12 @@ public class Control
                 {
                     if (i < Output.screenSize.y + Output.offset.y || (i == Output.screenSize.y + Output.offset.y && j % 2 == 0 && Console.WindowHeight - Output.hexSize.y * Output.screenSize.y >= Output.hexSize.y && i != map.hexes.GetLength(0)))
                     {
-                        Output.Grid(map.hexes[i, j]);
+                        Output.SbGrid(map.hexes[i, j], map);
                     }
                 }
                 if (Output.scale == 0 && i != Output.screenSize.y + Output.offset.y && Output.hexSize.x * Output.screenSize.x + Output.hexSize.x == Console.WindowWidth)
                 {
-                    Output.Grid(map.hexes[i, Output.screenSize.x + Output.offset.x]);
+                    Output.SbGrid(map.hexes[i, Output.screenSize.x + Output.offset.x], map);
                 }
             }
         }
@@ -241,14 +246,16 @@ public class Control
                 {
                     if (i < Output.screenSize.y + Output.offset.y || (i == Output.screenSize.y + Output.offset.y && j % 2 == 0 && Console.WindowHeight - Output.hexSize.y * Output.screenSize.y >= Output.hexSize.y && i != map.hexes.GetLength(0)))
                     {
-                        Output.NotGrid(map.hexes[i, j]);
+                        Output.SbNotGrid(map.hexes[i, j], map);
                     }
                 }
                 if (Output.scale == 0 && i != Output.screenSize.y + Output.offset.y && Output.hexSize.x * Output.screenSize.x + Output.hexSize.x == Console.WindowWidth)
                 {
-                    Output.NotGrid(map.hexes[i, Output.screenSize.x + Output.offset.x]);
+                    Output.SbNotGrid(map.hexes[i, Output.screenSize.x + Output.offset.x], map);
                 }
             }
         }
+        Console.SetCursorPosition(0, 0);
+        Console.Write(Output.uiLayer);
     }
 }
