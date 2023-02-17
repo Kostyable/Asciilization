@@ -3,9 +3,7 @@
 public abstract class Unit
 {
     public Civilization owner;
-    public int hp;
     public Hex currentHex;
-    public int movePoints;
 
     public Unit(Hex current, Civilization owner)
     {
