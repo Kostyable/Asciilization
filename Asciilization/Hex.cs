@@ -2,16 +2,16 @@
 
 public class Hex
 {
-    public Coordinates coord;
+    public Coord coord;
     public Terrain terrain;
-    public Civ civ;
+    public CivColors civColor;
+    public Neighbors? neighbors;
     public bool withRiver;
     public int riverDir;
     
     public Hex(int x, int y)
     {
-        coord.x = x;
-        coord.y = y;
+        coord = new Coord(x, y);
         riverDir = 6;
     }
 }

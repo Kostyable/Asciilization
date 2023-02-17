@@ -4,7 +4,7 @@ using WindowsInput.Native;
 
 namespace Asciilization;
 
-public class Game
+public static class Game
 {
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
@@ -19,6 +19,21 @@ public class Game
     const int WS_EX_LAYERED = 0x80000;
     const int LWA_ALPHA = 0x2;
     const int LWA_COLORKEY = 0x1;
+    
+    public static Map map;
+    public static Civilization[] civilizations;
+    public static Civilization playerCiv;
+
+    public static void Init()
+    {
+        map = new Map(100, 50);
+        civilizations = new Civilization[Enum.GetNames(typeof(CivNames)).Length];
+        for (int i = 0; i < civilizations.Length; i++)
+        {
+            civilizations[i] = new Civilization((CivNames)i);
+        }
+        playerCiv = civilizations[Generation.random.Next(Enum.GetNames(typeof(CivNames)).Length)];
+    }
     
     public static void Main(string[] args)
     {
@@ -35,21 +50,21 @@ public class Game
         IntPtr consoleWindow = User32.GetForegroundWindow();
         User32.SetWindowLong(consoleWindow, GWL_EXSTYLE, (int)User32.GetWindowLong(consoleWindow, GWL_EXSTYLE) ^ WS_EX_LAYERED);
         User32.SetLayeredWindowAttributes(consoleWindow, 0, 255, LWA_ALPHA);
-        Map map = new Map(100, 50);
-        map.Fill();
+        Init();
         Output.Init(16, 8, 0, 0, 3);
-        Control.CursorInCenter(map);
-        Launch(map);
+        Launch(map, civilizations);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
         inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RETURN);
         Control.Map(map);
     }
     
-    public static void Launch(Map map)
+    public static void Launch(Map map, Civilization[] civilizations)
     {
         Generation.Map(map);
         Generation.Rivers(map, 7, 5);
-        Generation.Civs(map, 4);
+        Generation.Settlers(map, civilizations);
+        map.Select(playerCiv.units[0].currentHex);
+        Control.CursorInCenter(map);
         Output.Map(map);
     }
 }

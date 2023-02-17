@@ -13,8 +13,8 @@ public static class Generation
     public static Perlin altitude = new Perlin();
     public static Perlin latitude = new Perlin();
     public static Perlin woodiness = new Perlin();
-    public static Coordinates[] neighbors = new Coordinates[6];
-    public static Coordinates[] nextNeighbors = new Coordinates[6];
+    public static Coord[] neighbors = new Coord[6];
+    public static Coord[] nextNeighbors = new Coord[6];
     public static int delta;
     public static float minValue;
     public static bool isNeighbor;
@@ -429,7 +429,7 @@ public static class Generation
         return false;
     }
     
-    public static void InitNeighbors(Hex hex, Coordinates[] arr, Map map)
+    public static void InitNeighbors(Hex hex, Coord[] arr, Map map)
     {
         if (sources.Contains(hex))
         {
@@ -443,12 +443,12 @@ public static class Generation
         {
             delta = 1;
         }
-        arr[0] = new Coordinates(hex.coord.x, hex.coord.y - 1);
-        arr[1] = new Coordinates(hex.coord.x - 1, hex.coord.y - 1 + delta);
-        arr[2] = new Coordinates(hex.coord.x - 1, hex.coord.y + delta);
-        arr[3] = new Coordinates(hex.coord.x, hex.coord.y + 1);
-        arr[4] = new Coordinates(hex.coord.x + 1, hex.coord.y + delta);
-        arr[5] = new Coordinates(hex.coord.x + 1, hex.coord.y - 1 + delta);
+        arr[0] = new Coord(hex.coord.x, hex.coord.y - 1);
+        arr[1] = new Coord(hex.coord.x - 1, hex.coord.y - 1 + delta);
+        arr[2] = new Coord(hex.coord.x - 1, hex.coord.y + delta);
+        arr[3] = new Coord(hex.coord.x, hex.coord.y + 1);
+        arr[4] = new Coord(hex.coord.x + 1, hex.coord.y + delta);
+        arr[5] = new Coord(hex.coord.x + 1, hex.coord.y - 1 + delta);
         for (int i = 0; i < arr.Length; i++)
         {
             if (arr[i].x != -1 && arr[i].x != map.hexes.GetLength(1) && arr[i].y != -1 && arr[i].y != map.hexes.GetLength(0))
@@ -627,51 +627,47 @@ public static class Generation
         return false;
     }
     
-    public static void Civs(Map map, int count)
+    public static void Settlers(Map map, Civilization[] civilizations)
     {
         int i = 0;
-        int randX;
-        int randY;
-        Hex[] hexNeighbors = new Hex[6];
+        Coord randomCoord;
         bool nearWater;
         bool neighborCiv;
-        while (i < count)
+        Neighbors neighbors;
+        while (i < civilizations.Length)
         {
-            nearWater = false;
-            neighborCiv = false;
-            randX = random.Next(map.hexes.GetLength(1));
-            randY = random.Next(map.hexes.GetLength(0));
-            if (map.hexes[randY, randX].terrain != Terrain.Water && map.hexes[randY, randX].terrain != Terrain.Mountains && map.hexes[randY, randX].civ == Civ.Without)
+            randomCoord.x = random.Next(map.hexes.GetLength(1));
+            randomCoord.y = random.Next(map.hexes.GetLength(0));
+            if (map.hexes[randomCoord.y, randomCoord.x].terrain != Terrain.Water && map.hexes[randomCoord.y, randomCoord.x].terrain != Terrain.Mountains)
             {
-                if (map.hexes[randY, randX].coord.x % 2 == 0)
+                nearWater = false;
+                neighborCiv = false;
+                neighbors = map.hexes[randomCoord.y, randomCoord.x].neighbors;
+                for (int j = 0; j < neighbors.hexes.Length; j++)
                 {
-                    delta = 0;
-                }
-                else
-                {
-                    delta = 1;
-                }
-                hexNeighbors[0] = map.hexes[randY - 1, randX];
-                hexNeighbors[1] = map.hexes[randY - 1 + delta, randX - 1];
-                hexNeighbors[2] = map.hexes[randY + delta, randX - 1];
-                hexNeighbors[3] = map.hexes[randY + 1, randX];
-                hexNeighbors[4] = map.hexes[randY + delta, randX + 1];
-                hexNeighbors[5] = map.hexes[randY - 1 + delta, randX + 1];
-                for (int j = 0; j < hexNeighbors.Length; j++)
-                {
-                    if (hexNeighbors[j].terrain == Terrain.Water)
+                    if (neighbors.hexes[j] != null)
                     {
-                        nearWater = true;
-                        break;
-                    }
-                    if (hexNeighbors[j].civ != Civ.Without)
-                    {
-                        neighborCiv = true;
+                        for (int k = 0; k < i; k++)
+                        {
+                            if (map.hexes[randomCoord.y, randomCoord.x] == civilizations[k].units[0].currentHex || neighbors.hexes[j] == civilizations[k].units[0].currentHex)
+                            {
+                                neighborCiv = true;
+                                break;
+                            }
+                        }
+                        if (neighborCiv)
+                        {
+                            break;
+                        }
+                        if (sources.Contains(map.hexes[randomCoord.y, randomCoord.x]) || neighbors.hexes[j].terrain == Terrain.Water)
+                        {
+                            nearWater = true;
+                        }
                     }
                 }
-                if ((map.hexes[randY, randX].withRiver || nearWater) && !neighborCiv)
+                if ((map.hexes[randomCoord.y, randomCoord.x].withRiver || nearWater) && !neighborCiv)
                 {
-                    map.hexes[randY, randX].civ = (Civ)i + 1;
+                    civilizations[i].units.Add(new Settler(map.hexes[randomCoord.y, randomCoord.x], civilizations[i]));
                     i++;
                 }
             }

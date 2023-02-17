@@ -8,6 +8,8 @@ public class Map
     public Map(int xLen, int yLen)
     {
         hexes = new Hex[yLen, xLen];
+        Fill();
+        //Select();
     }
     
     public void Fill()
@@ -19,21 +21,34 @@ public class Map
                 hexes[i, j] = new Hex(j, i);
             }
         }
-        if (Output.screenSize.x % 2 == 0 && Output.screenSize.y % 2 == 0)
+        foreach (Hex hex in hexes)
         {
-            isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2 + 1];
-        }
-        else if (Output.screenSize.x % 2 == 0)
-        {
-            isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2 + 1];
-        }
-        else if (Output.screenSize.y % 2 == 0)
-        {
-            isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2];
-        }
-        else
-        {
-            isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2];
+            hex.neighbors = new Neighbors(hex, this);
         }
     }
+    
+    public void Select(Hex hex)
+    {
+        isSelected = hexes[hex.coord.y, hex.coord.x];
+    }
+
+    // public void Select()
+    // {
+    //     if (Output.screenSize.x % 2 == 0 && Output.screenSize.y % 2 == 0)
+    //     {
+    //         isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2 + 1];
+    //     }
+    //     else if (Output.screenSize.x % 2 == 0)
+    //     {
+    //         isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2 + 1];
+    //     }
+    //     else if (Output.screenSize.y % 2 == 0)
+    //     {
+    //         isSelected = hexes[hexes.GetLength(0) / 2 + 1, hexes.GetLength(1) / 2];
+    //     }
+    //     else
+    //     {
+    //         isSelected = hexes[hexes.GetLength(0) / 2, hexes.GetLength(1) / 2];
+    //     }
+    // }
 }

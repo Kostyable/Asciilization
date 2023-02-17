@@ -1,41 +1,45 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 namespace Asciilization;
 
 public class Output
 {
-    public static Coordinates hexSize;
-    public static Coordinates screenSize;
-    public static Coordinates offset;
+    public static Coord hexSize;
+    public static Coord screenSize;
+    public static Coord offset;
     public static int scale;
-    public static Coordinates cursor;
+    public static Coord cursor;
     public static int delta;
     public static string backColor;
     public static string foreColor;
     public static string ch;
     public static string[] symbols;
     public static string mapBorder;
+    public static string unitColor;
     public static StringBuilder hexesLayer;
     public static StringBuilder riversLayer;
     public static StringBuilder uiLayer;
+    public static StringBuilder gridLayer;
     
     public static void Init(int hexSizeX, int hexSizeY, int offsetX, int offsetY, int sc)
     {
-        hexSize = new Coordinates(hexSizeX, hexSizeY);
-        offset = new Coordinates(offsetX, offsetY);
+        hexSize = new Coord(hexSizeX, hexSizeY);
+        offset = new Coord(offsetX, offsetY);
         scale = sc;
         SetScreenSize();
         symbols = new string[3];
-        mapBorder = "\x1b[48;5;" + "016" + "m\x1b[38;5;" + "020" + "m";
+        mapBorder = "\x1b[48;5;016m\x1b[38;5;020m";
         hexesLayer = new StringBuilder();
         riversLayer = new StringBuilder();
         uiLayer = new StringBuilder();
+        gridLayer = new StringBuilder();
         InitSymbols();
     }
     
     public static void Init(int hexSizeX, int hexSizeY, int sc)
     {
-        hexSize = new Coordinates(hexSizeX, hexSizeY);
+        hexSize = new Coord(hexSizeX, hexSizeY);
         scale = sc;
         SetScreenSize();
         InitSymbols();
@@ -45,9 +49,12 @@ public class Output
     {
         Hexes(map);
         Rivers(map);
+        UI(map);
         Console.Write(hexesLayer);
         Console.SetCursorPosition(0, 0);
         Console.Write(riversLayer);
+        Console.SetCursorPosition(0, 0);
+        Console.Write(uiLayer);
     }
 
     public static void Hexes(Map map)
@@ -1041,8 +1048,34 @@ public class Output
             }
         }
     }
+
+    public static void UI(Map map)
+    {
+        uiLayer.Append("\x1b[38;5;231m");
+        for (int k = 0; k < Game.civilizations.Length; k++)
+        {
+            for (int i = offset.y; i < screenSize.y + offset.y; i++)
+            {
+                for (int j = offset.x; j < screenSize.x + offset.x; j++)
+                {
+                    if (Game.civilizations[k].units.Count > 0 && Game.civilizations[k].units[0].currentHex == map.hexes[i, j] && scale > 2)
+                    {
+                        Settler(map.hexes[i, j], (Settler)Game.civilizations[k].units[0]);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void Settler(Hex hex, Settler settler)
+    {
+        backColor = SetBackgroundColor(hex);
+        unitColor = SetUnitColor(settler);
+        CountCursorPosition(hex.coord.x, hex.coord.y);
+        uiLayer.Append("\x1b[" + (cursor.y + 2) + ";" + (cursor.x + scale + 3) + "H_\x1b[1C_\x1b[1C_\x1b[1C\x1b[1B\x1b[7D|\x1b[48;5;" + unitColor + "m     \x1b[48;5;" + backColor + "m/\x1b[1B\x1b[7D|\x1b[48;5;" + unitColor + "m_ _ _\x1b[48;5;" + backColor + "m\\" + "\x1b[1B\x1b[7D|\x1b[1B\x1b[1D|");
+    }
     
-    public static void Cursor(Hex hex, Map map)
+    public static void Cursor(Hex hex, Map map, string color)
     {
         CountCursorPosition(hex.coord.x, hex.coord.y);
         if (hex.coord.x % 2 == 0)
@@ -1053,7 +1086,7 @@ public class Output
         {
             delta = 1;
         }
-        Console.Write("\x1b[38;5;" + 231 + "m");
+        Console.Write("\x1b[38;5;" + color + "m");
         if (cursor.y > 0)
         {
             if (hex.coord.y == 0)
@@ -1245,7 +1278,7 @@ public class Output
         {
             delta = 1;
         }
-        Console.Write("\x1b[38;5;" + 102 + "m");
+        Console.Write("\x1b[38;5;059m");
         if (cursor.y > 0)
         {
             if (hex.coord.y == 0)
@@ -1341,7 +1374,7 @@ public class Output
         {
             delta = 1;
         }
-        uiLayer.Append("\x1b[38;5;102m");
+        gridLayer.Append("\x1b[38;5;059m");
         if (cursor.y > 0)
         {
             if (hex.coord.y == 0)
@@ -1354,7 +1387,7 @@ public class Output
             }
             for (int i = 0; i < scale + 1; i++)
             {
-                uiLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
+                gridLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
             }
         }
         for (int i = 0; i < scale; i++)
@@ -1367,9 +1400,9 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m/");
+            gridLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m/");
             backColor = SetBackgroundColor(hex);
-            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m\\");
+            gridLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m\\");
         }
         if (cursor.x > 0)
         {
@@ -1381,7 +1414,7 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m/");
+            gridLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m/");
             if (hex.coord.y + delta == map.hexes.GetLength(0))
             {
                 backColor = "016";
@@ -1390,11 +1423,11 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m\\");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m\\");
         }
         backColor = SetBackgroundColor(hex);
-        uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m\\");
-        uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m/");
+        gridLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m\\");
+        gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m/");
         for (int i = 0; i < scale; i++)
         {
             if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
@@ -1405,14 +1438,14 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m\\");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m\\");
             backColor = SetBackgroundColor(hex);
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m/");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m/");
         }
         backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m_");
         }
     }
     
@@ -1427,7 +1460,7 @@ public class Output
         {
             delta = 1;
         }
-        uiLayer.Append("\x1b[38;5;102m");
+        gridLayer.Append("\x1b[38;5;102m");
         if (cursor.y > 0)
         {
             if (hex.coord.y == 0)
@@ -1440,7 +1473,7 @@ public class Output
             }
             for (int i = 0; i < scale + 1; i++)
             {
-                uiLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
+                gridLayer.Append("\x1b[" + cursor.y + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
             }
         }
         for (int i = 0; i < scale; i++)
@@ -1453,9 +1486,9 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + scale - i) + "H\x1b[48;5;" + backColor + "m ");
             backColor = SetBackgroundColor(hex);
-            uiLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + i + 1) + ";" + (cursor.x + hexSize.x - scale + i) + "H\x1b[48;5;" + backColor + "m ");
         }
         if (cursor.x > 0)
         {
@@ -1467,7 +1500,7 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y - 1 + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
             if (hex.coord.y + delta == map.hexes.GetLength(0))
             {
                 backColor = "016";
@@ -1476,11 +1509,11 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + cursor.x + "H\x1b[48;5;" + backColor + "m ");
         }
         backColor = SetBackgroundColor(hex);
-        uiLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
-        uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
+        gridLayer.Append("\x1b[" + (cursor.y + scale + 1) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
+        gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale) + ";" + (cursor.x + hexSize.x) + "H\x1b[48;5;" + backColor + "m ");
         for (int i = 0; i < scale; i++)
         {
             if (hex.coord.y + delta == map.hexes.GetLength(0) || hex.coord.x - 1 == -1)
@@ -1491,14 +1524,14 @@ public class Output
             {
                 backColor = SetBackgroundColor(map.hexes[hex.coord.y + delta, hex.coord.x - 1]);
             }
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + i + 1) + "H\x1b[48;5;" + backColor + "m ");
             backColor = SetBackgroundColor(hex);
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y - scale + i + 1) + ";" + (cursor.x + hexSize.x - i - 1) + "H\x1b[48;5;" + backColor + "m ");
         }
         backColor = SetBackgroundColor(hex);
         for (int i = 0; i < scale + 1; i++)
         {
-            uiLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
+            gridLayer.Append("\x1b[" + (cursor.y + hexSize.y) + ";" + (cursor.x + scale + 2 * i + 2) + "H\x1b[48;5;" + backColor + "m ");
         }
     }
     
@@ -1587,18 +1620,48 @@ public class Output
     
     public static string SetBackgroundColor(Hex hex)
     {
-        switch (hex.civ)
+        switch (hex.civColor)
         {
-            case Civ.Red:
-                return "088";
-            case Civ.Orange:
-                return "130";
-            case Civ.Cian:
-                return "030";
-            case Civ.Magenta:
-                return "091";
+            case CivColors.Red:
+                return "160";
+            case CivColors.Orange:
+                return "208";
+            case CivColors.Cian:
+                return "038";
+            case CivColors.DarkBlue:
+                return "057";
+            case CivColors.Yellow:
+                return "226";
+            case CivColors.Green:
+                return "118";
+            case CivColors.Purple:
+                return "128";
+            case CivColors.Blue:
+                return "026";
             default:
                 return "016";
+        }
+    }
+    public static string SetUnitColor(Settler settler)
+    {
+        switch (settler.owner.name)
+        {
+            case CivNames.India:
+                return "208";
+            case CivNames.Greece:
+                return "038";
+            case CivNames.Persia:
+                return "057";
+            case CivNames.Egypt:
+                return "226";
+            case CivNames.China:
+                return "118";
+            case CivNames.Carthage:
+                return "128";
+            case CivNames.Assyria:
+                return "026";
+            default:
+                return "160";
         }
     }
 }
