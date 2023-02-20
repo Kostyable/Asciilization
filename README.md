@@ -2,3 +2,4 @@
 
 ## Requirements
 - Windows 10 (64 bit) version 1511 or later / Ubuntu (64 bit)
+- .NET 7.0
