@@ -19,20 +19,22 @@ public static class Game
     const int WS_EX_LAYERED = 0x80000;
     const int LWA_ALPHA = 0x2;
     const int LWA_COLORKEY = 0x1;
-    
+
+    public static Random random;
     public static Map map;
     public static Civilization[] civilizations;
     public static Civilization playerCiv;
 
     public static void Init()
     {
+        random = new Random();
         map = new Map(100, 50);
         civilizations = new Civilization[Enum.GetNames(typeof(CivNames)).Length];
         for (int i = 0; i < civilizations.Length; i++)
         {
             civilizations[i] = new Civilization((CivNames)i);
         }
-        playerCiv = civilizations[Generation.random.Next(Enum.GetNames(typeof(CivNames)).Length)];
+        playerCiv = civilizations[random.Next(Enum.GetNames(typeof(CivNames)).Length)];
     }
     
     public static void Main(string[] args)

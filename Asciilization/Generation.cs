@@ -2,30 +2,46 @@
 
 public static class Generation
 {
+    public static Random random;
     public static float[,] valueAlitude;
     public static float[,] valueLatitude;
     public static float[,] valueWoodiness;
     public static float maxValueA;
     public static float maxValueL;
-    public static Random random = new Random();
-    public static float sid = random.Next(1, 9999999);
-    public static float zoom = 10f;
-    public static Perlin altitude = new Perlin();
-    public static Perlin latitude = new Perlin();
-    public static Perlin woodiness = new Perlin();
-    public static Coord[] neighbors = new Coord[6];
-    public static Coord[] nextNeighbors = new Coord[6];
+    public static float sid;
+    public static float zoom;
+    public static Perlin altitude;
+    public static Perlin latitude;
+    public static Perlin woodiness;
+    public static Coord[] neighbors;
+    public static Coord[] nextNeighbors;
     public static int delta;
     public static float minValue;
     public static bool isNeighbor;
-    public static List<River> rivers = new List<River>();
-    public static List<Hex> sources = new List<Hex>();
-    public static List<Hex> riverSources = new List<Hex>();
+    public static List<River> rivers;
+    public static List<Hex> sources;
+    public static List<Hex> riverSources;
     public static bool isRegenerate;
     public static int reverseValue;
+
+    public static void Init()
+    {
+        random = new Random();
+        sid = random.Next(1, 9999999);
+        zoom = 10f;
+        altitude = new Perlin();
+        latitude = new Perlin();
+        woodiness = new Perlin();
+        neighbors = new Coord[6];
+        nextNeighbors = new Coord[6];
+        rivers = new List<River>();
+        sources = new List<Hex>();
+        riverSources = new List<Hex>();
+    }
     
     public static void Map(Map map)
     {
+        Init();
         valueAlitude = new float[map.hexes.GetLength(0), map.hexes.GetLength(1)];
         maxValueA = 0f;
         for (int y = 0; y < map.hexes.GetLength(0); y++)
