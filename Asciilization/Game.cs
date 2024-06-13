@@ -1,7 +1,18 @@
-﻿namespace Asciilization;
+﻿using System.Runtime.InteropServices;
+
+namespace Asciilization;
 
 public static class Game
 {
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool GetConsoleMode(IntPtr handle, out int mode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GetStdHandle(int handle);
+    
     public static Random random;
     public static Map map;
     public static Civilization[] civilizations;
@@ -21,6 +32,10 @@ public static class Game
     
     public static void Main(string[] args)
     {
+        var handle = GetStdHandle(-11);
+        int mode;
+        GetConsoleMode(handle, out mode);
+        SetConsoleMode(handle, mode | 0x4);
         Console.Title = "ASCIILIZATION";
         Init();
         Output.Init(16, 8, 0, 0, 3);
